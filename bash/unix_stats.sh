@@ -25,7 +25,7 @@ fi
 
 BYTEPORT_BASE_URL="http://$BYTEPORT_API_HOST/services/store/$NAMESPACE/$DEVICE_UID/?_key=$API_KEY"
 
-if [ -z "$DEVICE_UID" ]; then
+if [ "$#" -lt 2 ]; then
     echo "Usage: $0 [namespace] [namespace api write key] <device_uid (optional)>"
     echo ""
     echo "This script will collect a number of common paramters useful for continous logging of a UNIX system"
