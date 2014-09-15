@@ -68,7 +68,9 @@ while :
 do	
 	rdv=`df -k / | awk '$3 ~ /[0-9]+/ { print $4 }'`
 	la5v=`uptime | awk '{ print $11 }'| tr -d ','`
-	data_string="rd_free=$rdv&la5=$la5v"
+        est_ports=`netstat -ant | awk '{print $6}' | sort | uniq -c | sort -n |tail -1|awk '{print $1}'`
+
+	data_string="rd_free=$rdv&la5=$la5v&est_ports=$est_ports"
 
 	`curl -s "$BYTEPORT_BASE_URL&$data_string"`
 
