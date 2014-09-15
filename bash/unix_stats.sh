@@ -66,8 +66,9 @@ fi
 
 while :
 do	
-	v=`df -k / | awk '$3 ~ /[0-9]+/ { print $4 }'`
-	data_string="rd_free=$v"
+	rdv=`df -k / | awk '$3 ~ /[0-9]+/ { print $4 }'`
+	la5v=`uptime | awk '{ print $11 }'| tr -d ','`
+	data_string="rd_free=$rdv&la5=$la5v"
 
 	`curl -s "$BYTEPORT_BASE_URL&$data_string"`
 
