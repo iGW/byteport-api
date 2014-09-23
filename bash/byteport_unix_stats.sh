@@ -69,8 +69,9 @@ do
 	rdv=`df -k / | awk '$3 ~ /[0-9]+/ { print $4 }'`
 	la5v=`uptime | awk '{ print $11 }'| tr -d ','`
         est_ports=`netstat -ant | awk '{print $6}' | sort | uniq -c | sort -n |tail -1|awk '{print $1}'`
-
-	data_string="rd_free=$rdv&la5=$la5v&est_ports=$est_ports"
+	eth0_rx_mb=$((`cat /sys/class/net/eth0/statistics/rx_bytes`/1024/1024))
+	eth0_tx_mb=$((`cat /sys/class/net/eth0/statistics/tx_bytes`/1024/1024))
+	data_string="rd_free=$rdv&la5=$la5v&est_ports=$est_ports&eth0_rx_mb=$eth0_rx_mb&eth0_tx_mb=$eth0_tx_mb"
 
 	`curl -s "$BYTEPORT_BASE_URL&$data_string"`
 
