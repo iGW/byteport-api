@@ -69,12 +69,22 @@ do
 	rdv=`df -k / | awk '$3 ~ /[0-9]+/ { print $4 }'`
 	la5v=`uptime | awk '{ print $9 }'| tr -d ','`
         est_ports=`netstat -ant | awk '{print $6}' | sort | uniq -c | sort -n |tail -1|awk '{print $1}'`
-        wlan0_rx_mb=$((`cat /sys/class/net/wlan0/statistics/rx_bytes`/1024/1024))
-        wlan0_tx_mb=$((`cat /sys/class/net/wlan0/statistics/tx_bytes`/1024/1024))
-        wlan0_level=$((`grep wlan0 /proc/net/wireless|awk '{ print \$4 }'|sed 's/\.$//'`))
-        eth0_rx_mb=$((`cat /sys/class/net/eth0/statistics/rx_bytes`/1024/1024))
-        eth0_tx_mb=$((`cat /sys/class/net/eth0/statistics/tx_bytes`/1024/1024))
-        data_string="rd_free=$rdv&la5=$la5v&est_ports=$est_ports&eth0_rx_mb=$eth0_rx_mb&eth0_tx_mb=$eth0_tx_mb&wlan0_rx_mb=$wlan0_rx_mb&wlan0_tx_mb=$wlan0_tx_mb&wlan0_level=$wlan0_level"
+
+        data_string="rd_free=$rdv&la5=$la5v&est_ports=$est_ports"
+
+        if [ -d "/sys/class/net/wlan0/" ]; then
+            wlan0_rx_mb=$((`cat /sys/class/net/wlan0/statistics/rx_bytes`/1024/1024))
+            wlan0_tx_mb=$((`cat /sys/class/net/wlan0/statistics/tx_bytes`/1024/1024))
+            wlan0_level=$((`grep wlan0 /proc/net/wireless|awk '{ print \$4 }'|sed 's/\.$//'`))
+            wlan0_data="wlan0_rx_mb=$wlan0_rx_mb&wlan0_tx_mb=$wlan0_tx_mb&wlan0_level=$wlan0_level"
+            data_string="$data_string&wlan0_data"
+        fi
+        if [ -d "/sys/class/net/wlan0/" ]; then
+            eth0_rx_mb=$((`cat /sys/class/net/eth0/statistics/rx_bytes`/1024/1024))
+            eth0_tx_mb=$((`cat /sys/class/net/eth0/statistics/tx_bytes`/1024/1024))
+            eth0_data="eth0_rx_mb=$eth0_rx_mb&eth0_tx_mb=$eth0_tx_mb"
+            data_string="$data_string&eth0_data"
+        fi
 
 	`curl -s "$BYTEPORT_BASE_URL&$data_string"`
 
