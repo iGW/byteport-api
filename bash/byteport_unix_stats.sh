@@ -77,13 +77,13 @@ do
             wlan0_tx_mb=$((`cat /sys/class/net/wlan0/statistics/tx_bytes`/1024/1024))
             wlan0_level=$((`grep wlan0 /proc/net/wireless|awk '{ print \$4 }'|sed 's/\.$//'`))
             wlan0_data="wlan0_rx_mb=$wlan0_rx_mb&wlan0_tx_mb=$wlan0_tx_mb&wlan0_level=$wlan0_level"
-            data_string="$data_string&wlan0_data"
+            data_string="$data_string&$wlan0_data"
         fi
         if [ -d "/sys/class/net/eth0/" ]; then
             eth0_rx_mb=$((`cat /sys/class/net/eth0/statistics/rx_bytes`/1024/1024))
             eth0_tx_mb=$((`cat /sys/class/net/eth0/statistics/tx_bytes`/1024/1024))
             eth0_data="eth0_rx_mb=$eth0_rx_mb&eth0_tx_mb=$eth0_tx_mb"
-            data_string="$data_string&eth0_data"
+            data_string="$data_string&$eth0_data"
         fi
 
 	`curl -s "$BYTEPORT_BASE_URL&$data_string"`
