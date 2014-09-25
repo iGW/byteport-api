@@ -76,8 +76,13 @@ do
             wlan0_rx_mb=$((`cat /sys/class/net/wlan0/statistics/rx_bytes`/1024/1024))
             wlan0_tx_mb=$((`cat /sys/class/net/wlan0/statistics/tx_bytes`/1024/1024))
             wlan0_level=$((`grep wlan0 /proc/net/wireless|awk '{ print \$4 }'|sed 's/\.$//'`))
-            wlan0_data="wlan0_rx_mb=$wlan0_rx_mb&wlan0_tx_mb=$wlan0_tx_mb&wlan0_level=$wlan0_level"
-            data_string="$data_string&$wlan0_data"
+            wlan0_data="wlan0_rx_mb=$wlan0_rx_mb&wlan0_tx_mb=$wlan0_tx_mb&wlan0_level=$wlan0_level"            
+	    data_string="$data_string&$wlan0_data"
+            if [ -f "/sbin/wpa_cli" ]; then
+		ssid=`wpa_cli status|grep ssid|grep -v bssid`
+		bssid=`wpa_cli status|grep bssid`
+		data_string="$data_string&$ssid&$bssid"
+	    fi
         fi
         if [ -d "/sys/class/net/eth0/" ]; then
             eth0_rx_mb=$((`cat /sys/class/net/eth0/statistics/rx_bytes`/1024/1024))
