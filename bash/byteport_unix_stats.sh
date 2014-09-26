@@ -90,6 +90,8 @@ do
             eth0_data="eth0_rx_mb=$eth0_rx_mb&eth0_tx_mb=$eth0_tx_mb"
             data_string="$data_string&$eth0_data"
         fi
+	# Replace whitespace with %20
+	data_string=echo $data_string| sed "s/[[:space:]]/%20/g"
 
 	`curl -s "$BYTEPORT_BASE_URL&$data_string"`
 
