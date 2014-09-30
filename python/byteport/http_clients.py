@@ -3,6 +3,8 @@ import urllib2
 import logging
 from urllib2 import HTTPError
 
+DEFAULT_BYTEPORT_API_STORE_URL = 'http://api.byteport.se/services/store/'
+
 class ByteportAPIException(Exception):
     pass
 
@@ -13,13 +15,12 @@ class ByteportAPINotFoundException(ByteportAPIException):
     pass
 
 class ByteportHttpGetClient:
-    BYTEPORT_API_URL = 'http://api.byteport.se/services/store/'
 
-    def __init__(self, namespace_name, api_key, device_uid):
+    def __init__(self, namespace_name, api_key, device_uid, byteport_api_store_url=DEFAULT_BYTEPORT_API_STORE_URL):
         self.namespace_name = namespace_name
         self.device_uid = device_uid
         self.api_key = api_key
-        self.base_url = self.BYTEPORT_API_URL+u'%s/%s/' % (namespace_name, device_uid)
+        self.base_url = byteport_api_store_url+u'%s/%s/' % (namespace_name, device_uid)
         logging.info('Storing data to Byteport using %s' % self.base_url)
 
         # Make empty test call to verify the credentials
