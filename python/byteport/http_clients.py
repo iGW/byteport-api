@@ -1,9 +1,9 @@
 import socks
-import socket
 import urllib
 import urllib2
 import logging
 from urllib2 import HTTPError
+from socksipyhandler import SocksiPyHandler
 
 DEFAULT_BYTEPORT_API_STORE_URL = 'http://api.byteport.se/services/store/'
 
@@ -42,13 +42,15 @@ class ByteportHttpGetClient:
         # Ie. for tunneling HTTP via SSH, first do:
         # ssh -D 5000 -N username@sshserver.org
         if proxy_port is not None:
-            socks.setdefaultproxy(proxy_type, proxy_addr,
-                                  proxy_port, username=proxy_username, password=proxy_password)
-            socket.socket = socks.socksocket
-            socks.wrapmodule(urllib2)
-            self.using_proxy = True
+            #socks.setdefaultproxy(proxy_type, proxy_addr,
+            #                      proxy_port, username=proxy_username, password=proxy_password)
+            #socket.socket = socks.socksocket
+            #socks.wrapmodule(urllib2)
+
+            self.opener = urllib2.build_opener(SocksiPyHandler(proxy_type, proxy_addr, proxy_port))
+            logging.info("Connecting through type %s proxy at %s:%s" % (proxy_type, proxy_addr, proxy_port))
         else:
-            self.using_proxy = False
+            self.opener = None
 
         # Make empty test call to verify the credentials
         self.store()
@@ -63,19 +65,22 @@ class ByteportHttpGetClient:
 
         data['_key'] = self.api_key
         encoded_data = urllib.urlencode(data)
-        url = u'%s/%s/?%s' % (self.base_url, device_uid, encoded_data)
+        url = '%s/%s/?%s' % (self.base_url, device_uid, encoded_data)
 
         try:
             logging.debug(url)
             # Set a valid User agent tag since api.byteport.se is CloudFlared
             # TODO: add a proper user-agent and make sure CloudFlare can handle it
-            req = urllib2.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
-            response = urllib2.urlopen(req)
+            if self.opener:
+                response = self.opener.open(url)
+            else:
+                req = urllib2.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
+                response = urllib2.urlopen(req)
             logging.debug(u'Response: %s' % response.read())
         except urllib2.URLError as e:
             logging.error(u'%s' % e)
             logging.info(u'Got URLError, make sure you have the correct network connections (ie. to the internet)!')
-            if self.using_proxy:
+            if self.opener is not None:
                 logging.info(u'Make sure your proxy settings are correct and you can connect to the proxy host you specified.')
             raise ByteportConnectException(u'Failed to connect to byteport, check your network and proxy settings and setup.')
 

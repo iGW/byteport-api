@@ -56,4 +56,4 @@ if __name__ == "__main__":
     logging.info("Proxy port :   %s" % proxy_port)
 
     client = ByteportHttpGetClient(namespace, namespace_api_write_key, device_uid, proxy_port=proxy_port)
-    collect_load_data(client, 30)
+    collect_load_data(client, 5)
