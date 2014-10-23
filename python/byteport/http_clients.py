@@ -16,22 +16,27 @@ class ByteportAPINotFoundException(ByteportAPIException):
 
 class ByteportHttpGetClient:
 
-    def __init__(self, namespace_name, api_key, device_uid, byteport_api_store_url=DEFAULT_BYTEPORT_API_STORE_URL):
+    def __init__(self, namespace_name, api_key, default_device_uid, byteport_api_store_url=DEFAULT_BYTEPORT_API_STORE_URL):
         self.namespace_name = namespace_name
-        self.device_uid = device_uid
+        self.device_uid = default_device_uid
         self.api_key = api_key
-        self.base_url = byteport_api_store_url+u'%s/%s/' % (namespace_name, device_uid)
-        logging.info('Storing data to Byteport using %s' % self.base_url)
+        self.base_url = byteport_api_store_url+'%s' % namespace_name
+        logging.info('Storing data to Byteport using %s/%s/' % (self.base_url, default_device_uid))
 
         # Make empty test call to verify the credentials
         self.store()
 
-    def store(self, data=None):
+    # Can use another device_uid to override the one used in the constructor
+    # Useful for Clients that acts as proxies for other devices, ie. over a sensor-network
+    def store(self, data=None, device_uid=None):
         if data is None:
             data = dict()
+        if device_uid is None:
+            device_uid = self.device_uid
+
         data['_key'] = self.api_key
         encoded_data = urllib.urlencode(data)
-        url = u'%s?%s' % (self.base_url, encoded_data)
+        url = u'%s/%s/?%s' % (self.base_url, device_uid, encoded_data)
 
         try:
             logging.debug(url)
@@ -49,6 +54,6 @@ class ByteportHttpGetClient:
                 raise ByteportAPIForbiddenException(message)
             if http_error.code == 404:
                 message = u'Make sure the device %s is registered under ' \
-                          u'namespace %s.' % (self.device_uid, self.namespace_name)
+                          u'namespace %s.' % (device_uid, self.namespace_name)
                 logging.info(message)
                 raise ByteportAPINotFoundException(message)
