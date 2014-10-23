@@ -33,7 +33,7 @@ if __name__ == "__main__":
     logging.debug('====>>> Note DEBUG log level is enabled by default in this example client.')
 
     if len(sys.argv) < 3:
-        print "Usage: %s <namespace name> <namespace api write key> [device uid]" % sys.argv[0]
+        print "Usage: %s <namespace name> <namespace api write key> [device uid] [proxy port]" % sys.argv[0]
         exit(1)
 
     namespace = sys.argv[1]
@@ -45,5 +45,15 @@ if __name__ == "__main__":
         hostname = socket.gethostname()
         device_uid = re.sub('[^0-9a-zA-Z]+', '_', hostname)
 
-    client = ByteportHttpGetClient(namespace, namespace_api_write_key, device_uid)
+    try:
+        proxy_port = int(sys.argv[4])
+    except Exception:
+        proxy_port = None
+
+    logging.info("Namespace  :   %s" % namespace)
+    logging.info("API key    :   %s" % namespace_api_write_key)
+    logging.info("Device UID :   %s" % device_uid)
+    logging.info("Proxy port :   %s" % proxy_port)
+
+    client = ByteportHttpGetClient(namespace, namespace_api_write_key, device_uid, proxy_port=proxy_port)
     collect_load_data(client, 30)
