@@ -3,6 +3,7 @@ import time
 import sys
 import socket
 import logging
+import subprocess
 import re
 from byteport.http_clients import ByteportHttpGetClient
 
@@ -55,5 +56,18 @@ if __name__ == "__main__":
     logging.info("Device UID :   %s" % device_uid)
     logging.info("Proxy port :   %s" % proxy_port)
 
+    # Create client object
     client = ByteportHttpGetClient(namespace, namespace_api_write_key, device_uid, proxy_port=proxy_port)
-    collect_load_data(client, 5)
+
+    # Log anything by sending a dictionary to the store() method
+    try:
+        git_version = subprocess.check_output(["git", "rev-parse", "--short", "HEAD"]).strip()
+        client.store({'git_version': git_version})
+    except Exception as e:
+        logging.warn("Failed to obtain git version.")
+
+    # Simple way to log text data around the system
+    client.log("Byteport Python Example client started!", level='info')
+
+    # Continous logging example
+    collect_load_data(client, 20)

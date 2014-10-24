@@ -30,7 +30,8 @@ class ByteportHttpGetClient:
                  proxy_addr="127.0.0.1",
                  proxy_port=None,
                  proxy_username=None,
-                 proxy_password=None
+                 proxy_password=None,
+                 initial_heartbeat=True
         ):
 
         self.namespace_name = namespace_name
@@ -53,7 +54,9 @@ class ByteportHttpGetClient:
             self.opener = None
 
         # Make empty test call to verify the credentials
-        self.store()
+        if initial_heartbeat:
+            # This can also act as heart beat, no need to send data to signal "online" in Byteport
+            self.store()
 
     # Can use another device_uid to override the one used in the constructor
     # Useful for Clients that acts as proxies for other devices, ie. over a sensor-network
@@ -96,3 +99,7 @@ class ByteportHttpGetClient:
                           u'namespace %s.' % (device_uid, self.namespace_name)
                 logging.info(message)
                 raise ByteportAPINotFoundException(message)
+
+    # Simple wrapper for logging with ease
+    def log(self, message, level='info', device_uid=None):
+        self.store({level: message}, device_uid)
