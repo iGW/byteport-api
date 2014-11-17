@@ -4,16 +4,15 @@
 #
 ########################################################
 
-CURL_BASE="curl -s"
+CURL_BASE_STANDARD="curl --silent"
+CURL_BASE_SOCKS5="curl --silent --socks5 localhost:5000"
+CURL_BASE="$CURL_BASE_STANDARD"
 NAMESPACE=$1
 API_KEY=$2
 RATE=60
 BYTEPORT_API_HOST="api.byteport.se"
 
 ########################################################
-# collecting commands
-#
-
 # Check for binaries
 hash curl 2>/dev/null || { echo >&2 "This program require cURL but it's not installed. Aborting."; exit 1; }
 
@@ -39,7 +38,7 @@ echo "Device UID = $DEVICE_UID"
 echo "Base URL = $BYTEPORT_BASE_URL"
 
 # Test base first
-response_code=`curl -s -o /dev/null -w "%{http_code}" $BYTEPORT_BASE_URL`
+response_code=`$CURL_BASE -s -o /dev/null -w "%{http_code}" $BYTEPORT_BASE_URL`
 
 if [ "$response_code" == "200" ]; then
     echo "Byteport API test call OK!"
@@ -68,32 +67,32 @@ while :
 do	
 	rdv=`df -k / | awk '$3 ~ /[0-9]+/ { print $4 }'`
 	la5v=`uptime | awk '{ print $9 }'| tr -d ','`
-        est_ports=`netstat -ant | awk '{print $6}' | sort | uniq -c | sort -n |tail -1|awk '{print $1}'`
+    est_ports=`netstat -ant | awk '{print $6}' | sort | uniq -c | sort -n |tail -1|awk '{print $1}'`
 
-        data_string="rd_free=$rdv&la5=$la5v&est_ports=$est_ports"
+    data_string="rd_free=$rdv&la5=$la5v&est_ports=$est_ports"
 
-        if [ -d "/sys/class/net/wlan0/" ]; then
-            wlan0_rx_mb=$((`cat /sys/class/net/wlan0/statistics/rx_bytes`/1024/1024))
-            wlan0_tx_mb=$((`cat /sys/class/net/wlan0/statistics/tx_bytes`/1024/1024))
-            wlan0_level=$((`grep wlan0 /proc/net/wireless|awk '{ print \$4 }'|sed 's/\.$//'`))
-            wlan0_data="wlan0_rx_mb=$wlan0_rx_mb&wlan0_tx_mb=$wlan0_tx_mb&wlan0_level=$wlan0_level"            
-	    data_string="$data_string&$wlan0_data"
-            if [ -f "/sbin/wpa_cli" ]; then
-		ssid=`wpa_cli status|grep ssid|grep -v bssid`
-		bssid=`wpa_cli status|grep bssid`
-		data_string="$data_string&$ssid&$bssid"
-	    fi
+    if [ -d "/sys/class/net/wlan0/" ]; then
+        wlan0_rx_mb=$((`cat /sys/class/net/wlan0/statistics/rx_bytes`/1024/1024))
+        wlan0_tx_mb=$((`cat /sys/class/net/wlan0/statistics/tx_bytes`/1024/1024))
+        wlan0_level=$((`grep wlan0 /proc/net/wireless|awk '{ print \$4 }'|sed 's/\.$//'`))
+        wlan0_data="wlan0_rx_mb=$wlan0_rx_mb&wlan0_tx_mb=$wlan0_tx_mb&wlan0_level=$wlan0_level"
+        data_string="$data_string&$wlan0_data"
+        if [ -f "/sbin/wpa_cli" ]; then
+            ssid=`wpa_cli status|grep ssid|grep -v bssid`
+            bssid=`wpa_cli status|grep bssid`
+            data_string="$data_string&$ssid&$bssid"
         fi
-        if [ -d "/sys/class/net/eth0/" ]; then
-            eth0_rx_mb=$((`cat /sys/class/net/eth0/statistics/rx_bytes`/1024/1024))
-            eth0_tx_mb=$((`cat /sys/class/net/eth0/statistics/tx_bytes`/1024/1024))
-            eth0_data="eth0_rx_mb=$eth0_rx_mb&eth0_tx_mb=$eth0_tx_mb"
-            data_string="$data_string&$eth0_data"
-        fi
+    fi
+    if [ -d "/sys/class/net/eth0/" ]; then
+        eth0_rx_mb=$((`cat /sys/class/net/eth0/statistics/rx_bytes`/1024/1024))
+        eth0_tx_mb=$((`cat /sys/class/net/eth0/statistics/tx_bytes`/1024/1024))
+        eth0_data="eth0_rx_mb=$eth0_rx_mb&eth0_tx_mb=$eth0_tx_mb"
+        data_string="$data_string&$eth0_data"
+    fi
 	# Replace whitespace with %20
 	data_string=`echo $data_string| sed 's/[[:space:]]/%20/g'`
 
-	`curl -s "$BYTEPORT_BASE_URL&$data_string"`
+	$CURL_BASE -s "$BYTEPORT_BASE_URL&$data_string"
 
-	sleep 60
+	sleep $RATE
 done
