@@ -1,9 +1,9 @@
-import socks
-import urllib
-import urllib2
+from . import socks
+import urllib.request, urllib.parse, urllib.error
+import urllib.request, urllib.error, urllib.parse
 import logging
-from urllib2 import HTTPError
-from socksipyhandler import SocksiPyHandler
+from urllib.error import HTTPError
+from .socksipyhandler import SocksiPyHandler
 
 DEFAULT_BYTEPORT_API_STORE_URL = 'http://api.byteport.se/services/store/'
 
@@ -48,7 +48,7 @@ class ByteportHttpGetClient:
             #socket.socket = socks.socksocket
             #socks.wrapmodule(urllib2)
 
-            self.opener = urllib2.build_opener(SocksiPyHandler(proxy_type, proxy_addr, proxy_port))
+            self.opener = urllib.request.build_opener(SocksiPyHandler(proxy_type, proxy_addr, proxy_port))
             logging.info("Connecting through type %s proxy at %s:%s" % (proxy_type, proxy_addr, proxy_port))
         else:
             self.opener = None
@@ -67,7 +67,7 @@ class ByteportHttpGetClient:
             device_uid = self.device_uid
 
         data['_key'] = self.api_key
-        encoded_data = urllib.urlencode(data)
+        encoded_data = urllib.parse.urlencode(data)
         url = '%s/%s/?%s' % (self.base_url, device_uid, encoded_data)
 
         try:
@@ -77,26 +77,26 @@ class ByteportHttpGetClient:
             if self.opener:
                 response = self.opener.open(url)
             else:
-                req = urllib2.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
-                response = urllib2.urlopen(req)
-            logging.debug(u'Response: %s' % response.read())
-        except urllib2.URLError as e:
-            logging.error(u'%s' % e)
-            logging.info(u'Got URLError, make sure you have the correct network connections (ie. to the internet)!')
+                req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
+                response = urllib.request.urlopen(req)
+            logging.debug('Response: %s' % response.read())
+        except urllib.error.URLError as e:
+            logging.error('%s' % e)
+            logging.info('Got URLError, make sure you have the correct network connections (ie. to the internet)!')
             if self.opener is not None:
-                logging.info(u'Make sure your proxy settings are correct and you can connect to the proxy host you specified.')
-            raise ByteportConnectException(u'Failed to connect to byteport, check your network and proxy settings and setup.')
+                logging.info('Make sure your proxy settings are correct and you can connect to the proxy host you specified.')
+            raise ByteportConnectException('Failed to connect to byteport, check your network and proxy settings and setup.')
 
         except HTTPError as http_error:
-            logging.error(u'%s' % http_error)
+            logging.error('%s' % http_error)
             if http_error.code == 403:
-                message = u'Verify that the namespace %s does allow writes by HTTP GET calls, and that the ' \
-                          u'API key is correct.' % self.namespace_name
+                message = 'Verify that the namespace %s does allow writes by HTTP GET calls, and that the ' \
+                          'API key is correct.' % self.namespace_name
                 logging.info(message)
                 raise ByteportAPIForbiddenException(message)
             if http_error.code == 404:
-                message = u'Make sure the device %s is registered under ' \
-                          u'namespace %s.' % (device_uid, self.namespace_name)
+                message = 'Make sure the device %s is registered under ' \
+                          'namespace %s.' % (device_uid, self.namespace_name)
                 logging.info(message)
                 raise ByteportAPINotFoundException(message)
 

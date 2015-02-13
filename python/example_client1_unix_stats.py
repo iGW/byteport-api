@@ -1,3 +1,4 @@
+from __future__ import print_function
 import os
 import time
 import sys
@@ -22,7 +23,7 @@ def collect_load_data(byteport_client, interval_sec=60):
             byteport_client.store(unix_stats)
         except Exception as e:
             # Catch and logg all errors and try again later is OK in this kind of use case
-            logging.error(u'Error during Byteport API call: %s' % e)
+            logging.error('Error during Byteport API call: %s' % e)
         time.sleep(interval_sec)
 
 '''
@@ -34,7 +35,7 @@ if __name__ == "__main__":
     logging.debug('====>>> Note DEBUG log level is enabled by default in this example client.')
 
     if len(sys.argv) < 3:
-        print "Usage: %s <namespace name> <namespace api write key> [device uid] [proxy port]" % sys.argv[0]
+        print("Usage: %s <namespace name> <namespace api write key> [device uid] [proxy port]" % sys.argv[0])
         exit(1)
 
     namespace = sys.argv[1]
