@@ -9,8 +9,48 @@ Ssign up for an account to get started.
 
 It is **free** for small volume users, such as hobbyists, achademics and startups.
 
+### Python teaser one - storing numbers
+```
+from http_clients import ByteportHttpGetClient
+import time
+
+client = ByteportHttpGetClient('myownspace', 'f00b4s3cretk3y', 'barDev1')
+
+client.store({'style': 1337})
+time.sleep(1)
+client.store({'style': 1338})
+time.sleep(1)
+client.store({'style': 1339})
+
+```
+
+### Python teaser two - storing a file as an object
+```
+from http_clients import ByteportHttpPostClient
+
+client = ByteportHttpPostClient('myownspace', 'f00b4s3cretk3y', 'barDev1')
+
+path_to_interesting_file = '/tmp/status_data'
+
+client.base64_encode_and_store_store_file('staus_files', path_to_interesting_file, compression='bzip2')
+
+```
+
 ## API documentation
-TODO
+### Byteport data model
+Byteport accepts:
+* Numbers
+* Text
+* Objects
+
+And so you may specify what kind of object you are storing by assigning a media type (formerly termed MIME-type) that will be supplied when fetching the data again.
+
+### Considerations to HTTP GET API
+While storing data usign HTTP GET calls might seem a bit backwards. But it is sometimes a nice feature for quick and dirty scenarios. The only caveat is the data size **limitation of 2 Kb**.
+
+### Storing objects
+To store data blocks **larger than 2K** you must use other methods available. For HTTP you can use the POST call instead. The reference implementations below all contain methods for storing objects. Binary data needs to be base64 encoded before storing. And before doing that, you might as well apply some compression to save some bandwidth and Byteport storage space.
+
 
 ## General preparations
 Independent of client technology, do the following steps to ensure you can store data using the HTTP API
