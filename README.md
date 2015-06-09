@@ -32,4 +32,4 @@ The reference implementation is made in Python. But the HTTP API can of course b
 ```
 
 #### Usage
-Have a look at the use-cases at the [integration test suite][https://github.com/iGW/byteport-api/blob/master/python/byteport/integration_tests.py).
+Have a look at the use-cases at the [integration test suite](https://github.com/iGW/byteport-api/blob/master/python/byteport/integration_tests.py).
