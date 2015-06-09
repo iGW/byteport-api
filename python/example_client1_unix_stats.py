@@ -19,7 +19,9 @@ def collect_load_data(byteport_client, interval_sec=60):
         unix_stats['la15'] = loadavg[2]
 
         try:
+            #before = time.time()
             byteport_client.store(unix_stats)
+            #print "It took %s seconds" % (time.time() - before)
         except Exception as e:
             # Catch and logg all errors and try again later is OK in this kind of use case
             logging.error(u'Error during Byteport API call: %s' % e)
@@ -70,4 +72,4 @@ if __name__ == "__main__":
     client.log("Byteport Python Example client started!", level='info')
 
     # Continous logging example
-    collect_load_data(client, 20)
+    collect_load_data(client, 1)
