@@ -5,7 +5,7 @@ Read all about it here
 
 www.byteport.se and 
 
-Ssign up for an account to get started.
+Sign up for an account to get started.
 
 It is **free** for small volume users, such as hobbyists, achademics and startups.
 
