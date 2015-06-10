@@ -1,8 +1,13 @@
 import unittest
+import datetime
 
 from http_clients import ByteportHttpGetClient, ByteportHttpPostClient
 
+'''
 
+NOTE: All tests here need a Byteport instance to communicate with
+
+'''
 class TestHttpClients(unittest.TestCase):
 
     hostname = 'localhost:8000'
@@ -21,10 +26,59 @@ class TestHttpClients(unittest.TestCase):
             default_device_uid=self.device_uid
         )
 
-        data = {'fukt': 20}
+        data = {'string': 'hello string'}
 
         # Will raise exception upon errors
         client.store(data)
+
+    def test_should_store_number_to_single_field_name_using_GET_client(self):
+        client = ByteportHttpGetClient(
+            byteport_api_store_url=self.byteport_api_store_url,
+            namespace_name=self.namespace,
+            api_key=self.key,
+            default_device_uid=self.device_uid
+        )
+
+        data = {'number': 1337}
+
+        # Will raise exception upon errors
+        client.store(data)
+
+    def test_should_store_number_to_single_field_name_with_custom_high_prec_timestamp_using_GET_client(self):
+        client = ByteportHttpGetClient(
+            byteport_api_store_url=self.byteport_api_store_url,
+            namespace_name=self.namespace,
+            api_key=self.key,
+            default_device_uid=self.device_uid
+        )
+
+        data = {'number': 1338}
+
+        # Will raise exception upon errors
+        custom_timestamp = datetime.datetime.strptime('2015-05-01T00:00:00.012345', '%Y-%m-%dT%H:%M:%S.%f')
+        client.store(data, timestamp=custom_timestamp)
+
+    def test_should_log_info_using_GET_client(self):
+        client = ByteportHttpGetClient(
+            byteport_api_store_url=self.byteport_api_store_url,
+            namespace_name=self.namespace,
+            api_key=self.key,
+            default_device_uid=self.device_uid
+        )
+
+        # Will raise exception upon errors
+        client.log('info from integration tests using GET API', 'info')
+
+    def test_should_log_info_using_POST_client(self):
+        client = ByteportHttpPostClient(
+            byteport_api_store_url=self.byteport_api_store_url,
+            namespace_name=self.namespace,
+            api_key=self.key,
+            default_device_uid=self.device_uid
+        )
+
+        # Will raise exception upon errors
+        client.log('info from integration tests using POST API', 'info')
 
     def test_should_store_string_to_single_field_name_using_POST_client(self):
         client = ByteportHttpPostClient(

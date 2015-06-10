@@ -65,9 +65,11 @@ Independent of client technology, do the following steps to ensure you can store
 The reference implementation is made in Python. But the HTTP API can of course be accessed using any language. Python is clear and simple enough to be used as a
 
 #### Install
+Pytz is so good it should be in the standard library. It is not yet, so we have to pip it.
 ```
  $ git clone https://github.com/iGW/byteport-api/
- $ cd byteport-api
+ $ cd byteport-api/python
+ $ pip install -r requirements.txt
  $ python ./setup.py install
 ```
 

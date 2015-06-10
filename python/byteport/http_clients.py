@@ -5,6 +5,8 @@ import logging
 import base64
 import zlib
 import bz2
+import datetime
+import pytz
 
 from urllib2 import HTTPError
 from socksipyhandler import SocksiPyHandler
@@ -24,8 +26,12 @@ class ByteportAPIForbiddenException(ByteportAPIException):
 class ByteportAPINotFoundException(ByteportAPIException):
     pass
 
-class ByteportClkentUnsupportedCompression(ByteportAPIException):
+class ByteportClientUnsupportedCompression(ByteportAPIException):
     pass
+
+class ByteportClientUnsupportedTimestampType(ByteportAPIException):
+    pass
+
 
 class ByteportHttpClientBase:
 
@@ -60,6 +66,40 @@ class ByteportHttpClientBase:
         if initial_heartbeat:
             # This can also act as heart beat, no need to send data to signal "online" in Byteport
             self.store()
+
+    # Byteport supports milli-second precision timestamps but the API sends micro-second precision
+    # timestamps if possible to support a possible future enhancement.
+    #
+    # Helper that can take a timestamp as epoch as string or number, or a datetime object
+    # it will return a unix epoch as float converted to a string since we do not want
+    # the string conversion to be left to other layers leading to possible precision
+    # or rounding errors
+    def auto_timestamp(self, timestamp):
+        if type(timestamp) is int:
+            fs = float(timestamp)
+        elif type(timestamp) is float:
+            fs = timestamp
+        elif type(timestamp) is datetime.datetime:
+            as_utc = self.timestamp_as_utc(timestamp)
+            as_micros = self.unix_time_micros(as_utc)
+            fs = as_micros / 1e6
+        else:
+            raise ByteportClientUnsupportedTimestampType("Invalid format for auto_timestamp(): " % type(timestamp))
+
+        # Will not leave trailing zeros, see
+        # http://stackoverflow.com/questions/2440692/formatting-floats-in-python-without-superfluous-zeros
+        return ('%f' % fs).rstrip('0').rstrip('.')
+
+    def unix_time_micros(self, datetime_object):
+        td = (datetime_object - datetime.datetime(1970, 1, 1, tzinfo=pytz.utc))
+        u_secs = td.microseconds + ((td.seconds + td.days * 24 * 3600) * 10**6)
+        return u_secs
+
+    def timestamp_as_utc(self, datetime_object):
+        if datetime_object.tzinfo:
+            return datetime_object
+        else:
+            return pytz.utc.localize(datetime_object)
 
     def store(self, data=None, device_uid=None):
         raise NotImplementedError("Store is not implemented in this class")
@@ -112,15 +152,22 @@ class ByteportHttpPostClient(ByteportHttpClientBase):
     #
     #    Store a single file vs a field name to Byteport via HTTP POST with optional compresstion
     #
-    def base64_encode_and_store_store_file(self, field_name, path_to_file, device_uid=None, compression=None):
+    def base64_encode_and_store_store_file(self, field_name, path_to_file,
+                                           device_uid=None, timestamp=None, compression=None):
+
+        if timestamp is not None:
+            timestamp = self.auto_timestamp(timestamp)
+
         with open(path_to_file, 'r') as content_file:
             file_data = content_file.read()
-            self.base64_encode_and_store_store(field_name, file_data, device_uid, compression)
+            self.base64_encode_and_store_store(field_name, file_data, device_uid, timestamp, compression)
 
     #
     #    Store a single data block vs a field name to Byteport via HTTP POST
     #
-    def base64_encode_and_store_store(self, field_name, fileobj, device_uid=None, compression=None):
+    def base64_encode_and_store_store(self, field_name, fileobj,
+                                      device_uid=None, timestamp=None, compression=None):
+
         if compression is None:
             data_block = fileobj
         elif compression == 'gzip':
@@ -128,13 +175,17 @@ class ByteportHttpPostClient(ByteportHttpClientBase):
         elif compression == 'bzip2':
             data_block = bz2.compress(fileobj)
         else:
-            raise ByteportClkentUnsupportedCompression("Unsupported compression method '%s'" % compression)
+            raise ByteportClientUnsupportedCompression("Unsupported compression method '%s'" % compression)
 
         data = {field_name: base64.b64encode(data_block)}
 
+        if timestamp is not None:
+            timestamp = self.auto_timestamp(timestamp)
+            data['_ts'] = timestamp
+
         self.store(data, device_uid)
 
-    def store(self, data=None, device_uid=None):
+    def store(self, data=None, device_uid=None, timestamp=None):
         if data is None:
             data = dict()
         if device_uid is None:
@@ -146,17 +197,30 @@ class ByteportHttpPostClient(ByteportHttpClientBase):
         self.make_request(url, device_uid, data)
 
 
+'''
+    Simple client for sending data using HTTP GET request (ie. data goes as request parameters)
+
+    Use the ByteportHttpPostClient for most cases unless you have very good reason for using this method.
+
+    Since URLs are limited to 2Kb, the maximum allowed data to send is limited for each request.
+
+'''
 class ByteportHttpGetClient(ByteportHttpClientBase):
 
     # Can use another device_uid to override the one used in the constructor
     # Useful for Clients that acts as proxies for other devices, ie. over a sensor-network
-    def store(self, data=None, device_uid=None):
+    def store(self, data=None, device_uid=None, timestamp=None):
         if data is None:
             data = dict()
         if device_uid is None:
             device_uid = self.device_uid
 
         data['_key'] = self.api_key
+
+        if timestamp is not None:
+            float_timestamp = self.auto_timestamp(timestamp)
+            data['_ts'] = float_timestamp
+
         encoded_data = urllib.urlencode(data)
         url = '%s/%s/?%s' % (self.base_url, device_uid, encoded_data)
 

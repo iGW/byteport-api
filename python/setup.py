@@ -4,7 +4,7 @@ __author__ = 'hans'
 from distutils.core import setup
 
 setup(name='Byteport API',
-      version='0.30',
+      version='0.32',
       description='Simple HTTP Client vs Byteport (www.byteport.se)',
       author='Hans Eklund',
       author_email='hans.eklund@igw.se',
