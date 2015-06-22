@@ -9,10 +9,9 @@ Sign up for an account to get started.
 
 It is **free** for small volume users, such as hobbyists, achademics and startups.
 
-### Reference
 
-
-### Python teaser one - storing numbers
+### Python example 1 - storing numbers
+A common use-case is to send some data at regular intervals
 ```
 from http_clients import ByteportHttpGetClient
 import time
@@ -27,7 +26,8 @@ while True:
 
 ```
 
-### Python teaser two - storing a file as an object
+### Python example 2 - storing a file as an object
+In this case a signle file is read, compressed, encoded and sent to byteport with a few lines of code.
 ```
 from http_clients import ByteportHttpPostClient
 
