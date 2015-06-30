@@ -9,22 +9,25 @@ Sign up for an account to get started.
 
 It is **free** for small volume users, such as hobbyists, achademics and startups.
 
-### Python teaser one - storing numbers
+
+### Python example 1 - storing numbers
+A common use-case is to send some data at regular intervals
 ```
 from http_clients import ByteportHttpGetClient
 import time
 
+# Will send a single empty heart beat packet.
 client = ByteportHttpGetClient('myownspace', 'f00b4s3cretk3y', 'barDev1')
 
-client.store({'style': 1337})
-time.sleep(1)
-client.store({'style': 1338})
-time.sleep(1)
-client.store({'style': 1339})
+while True:
+    # Store a string and the current UNIX Epoch time on a regular interval
+    client.store({'info': 'All systems nominal', 'current_time': time.time()})
+    time.sleep(60)
 
 ```
 
-### Python teaser two - storing a file as an object
+### Python example 2 - storing a file as an object
+In this case a signle file is read, compressed, encoded and sent to byteport with a few lines of code.
 ```
 from http_clients import ByteportHttpPostClient
 
