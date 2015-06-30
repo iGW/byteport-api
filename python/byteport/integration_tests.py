@@ -1,7 +1,7 @@
+# -*- coding: utf-8 -*-
 import unittest
-import datetime
 
-from http_clients import ByteportHttpGetClient, ByteportHttpPostClient
+from http_clients import *
 
 '''
 
@@ -11,11 +11,13 @@ NOTE: All tests here need a Byteport instance to communicate with
 class TestHttpClients(unittest.TestCase):
 
     hostname = 'localhost:8000'
-    # hostname = 'api.byteport.se'
+    #hostname = 'acc.byteport.se'
+    #hostname = 'api.byteport.se'
     byteport_api_store_url = 'http://%s/services/store/' % hostname
 
     namespace = 'test'
     device_uid = '6000'
+    #key = 'd74f48f8375a32ca632fa49a'
     key = 'TEST'
 
     def test_should_store_string_to_single_field_name_using_GET_client(self):
@@ -30,6 +32,32 @@ class TestHttpClients(unittest.TestCase):
 
         # Will raise exception upon errors
         client.store(data)
+
+    def test_should_store_utf8_convertibel_string_to_single_field_name_using_GET_client(self):
+        client = ByteportHttpGetClient(
+            byteport_api_store_url=self.byteport_api_store_url,
+            namespace_name=self.namespace,
+            api_key=self.key,
+            default_device_uid=self.device_uid
+        )
+
+        # Unicode string that can be converted to UTF-8
+        data = {'unicode_string': u'mötley crüe'}
+
+        client.store(data)
+
+    def test_should_not_store_non_utf8_convertible_string_to_single_field_name_using_GET_client(self):
+        client = ByteportHttpGetClient(
+            byteport_api_store_url=self.byteport_api_store_url,
+            namespace_name=self.namespace,
+            api_key=self.key,
+            default_device_uid=self.device_uid
+        )
+
+        # A sting that can not be encoded to UTF-8: exception should be thrown client side
+        data = {'unicode_string': '\x80'}
+
+        self.assertRaises(ByteportClientInvalidDataTypeException, client.store, data)
 
     def test_should_store_number_to_single_field_name_using_GET_client(self):
         client = ByteportHttpGetClient(
@@ -106,7 +134,7 @@ class TestHttpClients(unittest.TestCase):
         data_block = 'hello world'
 
         # Will raise exception upon errors
-        client.base64_encode_and_store_store(field_name, data_block)
+        client.base64_encode_and_store(field_name, data_block)
 
     def test_should_store_binary_data_to_single_field_name_using_POST_client(self):
         client = ByteportHttpPostClient(
@@ -121,7 +149,7 @@ class TestHttpClients(unittest.TestCase):
         binary_data = '\x10\x20\x30\x40'
 
         # Will raise exception upon errors
-        client.base64_encode_and_store_store(field_name, binary_data)
+        client.base64_encode_and_store(field_name, binary_data)
 
     def test_should_compress_and_store_binary_data_to_single_field_name_using_POST_client(self):
         client = ByteportHttpPostClient(
@@ -136,7 +164,7 @@ class TestHttpClients(unittest.TestCase):
         binary_data = '\x10\x20\x30\x40'
 
         # Will raise exception upon errors
-        client.base64_encode_and_store_store(field_name, binary_data, compression='gzip')
+        client.base64_encode_and_store(field_name, binary_data, compression='gzip')
 
     def test_should_store_10K_binary_data_to_single_field_name_using_POST_client(self):
         client = ByteportHttpPostClient(
@@ -156,7 +184,7 @@ class TestHttpClients(unittest.TestCase):
             data_buffer.extend(binary_data_base)
 
         # Will raise exception upon errors
-        client.base64_encode_and_store_store(field_name, bytes(data_buffer))
+        client.base64_encode_and_store(field_name, bytes(data_buffer))
 
     def test_should_store_10K_binary_data_and_gzip_to_single_field_name_using_POST_client(self):
         client = ByteportHttpPostClient(
@@ -176,7 +204,7 @@ class TestHttpClients(unittest.TestCase):
             data_buffer.extend(binary_data_base)
 
         # Will raise exception upon errors
-        client.base64_encode_and_store_store(field_name, bytes(data_buffer), compression='gzip')
+        client.base64_encode_and_store(field_name, bytes(data_buffer), compression='gzip')
 
     def test_should_store_10K_binary_data_and_bzip2_to_single_field_name_using_POST_client(self):
         client = ByteportHttpPostClient(
@@ -196,7 +224,7 @@ class TestHttpClients(unittest.TestCase):
             data_buffer.extend(binary_data_base)
 
         # Will raise exception upon errors
-        client.base64_encode_and_store_store(field_name, bytes(data_buffer), compression='bzip2')
+        client.base64_encode_and_store(field_name, bytes(data_buffer), compression='bzip2')
 
     def test_should_store_test_file_and_bzip2_to_single_field_name_using_POST_client(self):
         client = ByteportHttpPostClient(
@@ -209,4 +237,16 @@ class TestHttpClients(unittest.TestCase):
         field_name = 'file_bzip2_b64'
 
         # Will raise exception upon errors
-        client.base64_encode_and_store_store_file(field_name, './test_file_for_integration_tests.txt', compression='bzip2')
+        client.base64_encode_and_store_file(field_name, './test_file_for_integration_tests.txt', compression='bzip2')
+
+class TestHttpClient(unittest.TestCase):
+
+    TEST_BROKERS = ['canopus']
+
+    test_device_uid = '6000'
+
+    def test_should_connect_and_send_one_message_using_stomp_client(self):
+
+        client = ByteportStompClient('test', 'publicTestUser', 'publicTestUser', broker_hosts=self.TEST_BROKERS)
+
+        client.store({'stomp_data': 'hello STOMP world!'}, self.test_device_uid)

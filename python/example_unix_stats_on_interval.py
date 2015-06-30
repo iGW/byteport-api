@@ -5,7 +5,7 @@ import socket
 import logging
 import subprocess
 import re
-from byteport.http_clients import ByteportHttpGetClient
+from byteport.factories import byteport_client_from_simple_argv
 
 
 def collect_load_data(byteport_client, interval_sec=60):
@@ -35,31 +35,7 @@ if __name__ == "__main__":
     logging.basicConfig(level=logging.DEBUG)
     logging.debug('====>>> Note DEBUG log level is enabled by default in this example client.')
 
-    if len(sys.argv) < 3:
-        print "Usage: %s <namespace name> <namespace api write key> [device uid] [proxy port]" % sys.argv[0]
-        exit(1)
-
-    namespace = sys.argv[1]
-    namespace_api_write_key = sys.argv[2]
-
-    try:
-        device_uid = sys.argv[3]
-    except Exception:
-        hostname = socket.gethostname()
-        device_uid = re.sub('[^0-9a-zA-Z]+', '_', hostname)
-
-    try:
-        proxy_port = int(sys.argv[4])
-    except Exception:
-        proxy_port = None
-
-    logging.info("Namespace  :   %s" % namespace)
-    logging.info("API key    :   %s" % namespace_api_write_key)
-    logging.info("Device UID :   %s" % device_uid)
-    logging.info("Proxy port :   %s" % proxy_port)
-
-    # Create client object
-    client = ByteportHttpGetClient(namespace, namespace_api_write_key, device_uid, proxy_port=proxy_port)
+    client = byteport_client_from_simple_argv()
 
     # Log anything by sending a dictionary to the store() method
     try:
