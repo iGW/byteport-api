@@ -203,6 +203,7 @@ class AbstractByteportHttpClient(AbstractByteportClient):
     def store(self, data=None, device_uid=None):
         raise NotImplementedError("Store is not implemented in this class that is considered Abstract")
 
+
 class ByteportHttpPostClient(AbstractByteportHttpClient):
 
     #
@@ -255,6 +256,15 @@ class ByteportHttpPostClient(AbstractByteportHttpClient):
 
         self.make_request(url, device_uid, utf8_encoded_data)
 
+
+'''
+    The preferred way of accessing byteport is through HTTPS POST calls.
+
+    This class reflects that.
+
+'''
+class ByteportHttpClient(ByteportHttpPostClient):
+    pass
 
 '''
     Simple client for sending data using HTTP GET request (ie. data goes as request parameters)

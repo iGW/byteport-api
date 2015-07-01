@@ -4,7 +4,7 @@ import socket
 import logging
 from optparse import OptionParser
 
-from http_clients import ByteportHttpPostClient
+from http_clients import ByteportHttpClient
 
 def byteport_client_from_optparse():
 
@@ -27,7 +27,7 @@ def byteport_client_from_optparse():
         device_uid = options.device_uid
 
     # Create client object
-    client = ByteportHttpPostClient(
+    client = ByteportHttpClient(
         options.namespace, options.api_key, device_uid, proxy_port=options.proxy_port)
 
     return client, parser
@@ -70,6 +70,6 @@ def byteport_client_from_simple_argv():
     logging.info("Proxy port :   %s" % proxy_port)
 
     # Create client object
-    return ByteportHttpPostClient(namespace, namespace_api_write_key, device_uid, proxy_port=proxy_port)
+    return ByteportHttpClient(namespace, namespace_api_write_key, device_uid, proxy_port=proxy_port)
 
 

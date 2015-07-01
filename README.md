@@ -7,7 +7,7 @@ www.byteport.se and
 
 Sign up for an account to get started.
 
-It is **free** for small volume users, such as hobbyists, achademics and startups.
+It is **free** for small volume users, such as hobbyists, academics and start-ups.
 
 
 ### Python example 1 - storing numbers
@@ -17,7 +17,7 @@ from http_clients import ByteportHttpGetClient
 import time
 
 # Will send a single empty heart beat packet.
-client = ByteportHttpGetClient('myownspace', 'f00b4s3cretk3y', 'barDev1')
+client = ByteportHttpClient('myownspace', 'f00b4s3cretk3y', 'barDev1')
 
 while True:
     # Store a string and the current UNIX Epoch time on a regular interval
@@ -27,11 +27,11 @@ while True:
 ```
 
 ### Python example 2 - storing a file as an object
-In this case a signle file is read, compressed, encoded and sent to byteport with a few lines of code.
+In this case a single file is read, compressed, encoded and sent to byteport with a few lines of code.
 ```
 from http_clients import ByteportHttpPostClient
 
-client = ByteportHttpPostClient('myownspace', 'f00b4s3cretk3y', 'barDev1')
+client = ByteportHttpClient('myownspace', 'f00b4s3cretk3y', 'barDev1')
 
 path_to_interesting_file = '/tmp/status_data'
 
@@ -60,7 +60,7 @@ Independent of client technology, do the following steps to ensure you can store
 
 1. Create a new namespace in Byteport: http://www.byteport.se/manager/namespaces/
 2. Open up the namespace and click the **Security** tab.
-3. In the box **API settings** change *HTTP Write method* to allow storage using the HTTP GET and/or POST APIs.
+3. In the box **API settings** change *HTTP Write method* to allow storage using the HTTP GET and POST methods.
 4. Use *API Write key* when trying out the client examples below. You can set a new one, or use the generated. Leave blank to generate a new.
 
 ## Client implementations
