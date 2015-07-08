@@ -30,12 +30,10 @@ while True:
 A file is read and the content of the file is stored as value to the field called temperature.
 ```
 from http_clients import ByteportHttpGetClient
-import time
 
 # Will send a single empty heart beat packet.
 client = ByteportHttpClient('myownspace', 'f00b4s3cretk3y', 'barDev1')
 
-# Will raise exception upon errors
 client.store_file('temperature', './current_temperature')
 ```
 
