@@ -26,7 +26,20 @@ while True:
 
 ```
 
-### Python example 2 - storing a file as an object
+### Python example 2 - storing file content as value
+A file is read and the content of the file is stored as value to the field called temperature.
+```
+from http_clients import ByteportHttpGetClient
+import time
+
+# Will send a single empty heart beat packet.
+client = ByteportHttpClient('myownspace', 'f00b4s3cretk3y', 'barDev1')
+
+# Will raise exception upon errors
+client.store_file('temperature', './current_temperature')
+```
+
+### Python example 3 - storing file content as value after encoding
 In this case a single file is read, compressed, encoded and sent to byteport with a few lines of code.
 ```
 from http_clients import ByteportHttpPostClient
