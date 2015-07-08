@@ -10,15 +10,15 @@ NOTE: All tests here need a Byteport instance to communicate with
 '''
 class TestHttpClients(unittest.TestCase):
 
-    hostname = 'localhost:8000'
+    #hostname = 'localhost:8000'
     #hostname = 'acc.byteport.se'
-    #hostname = 'api.byteport.se'
+    hostname = 'api.byteport.se'
     byteport_api_store_url = 'http://%s/services/store/' % hostname
 
     namespace = 'test'
-    device_uid = '6000'
-    #key = 'd74f48f8375a32ca632fa49a'
-    key = 'TEST'
+    device_uid = 'byteport-api-tests'
+    key = 'd74f48f8375a32ca632fa49a'
+    #key = 'TEST'
 
     def test_should_store_string_to_single_field_name_using_GET_client(self):
         client = ByteportHttpGetClient(
@@ -32,6 +32,19 @@ class TestHttpClients(unittest.TestCase):
 
         # Will raise exception upon errors
         client.store(data)
+
+    def test_should_store_data_series_using_GET_client(self):
+        client = ByteportHttpGetClient(
+            byteport_api_store_url=self.byteport_api_store_url,
+            namespace_name=self.namespace,
+            api_key=self.key,
+            default_device_uid=self.device_uid
+        )
+
+        for v in range(0, 10):
+            data = {'ramp': float(v)+0.0001}
+            client.store(data)
+            time.sleep(0.2)
 
     def test_should_store_utf8_convertibel_string_to_single_field_name_using_GET_client(self):
         client = ByteportHttpGetClient(
@@ -225,6 +238,19 @@ class TestHttpClients(unittest.TestCase):
 
         # Will raise exception upon errors
         client.base64_encode_and_store(field_name, bytes(data_buffer), compression='bzip2')
+
+    def test_should_store_test_file_single_field_name_using_POST_client(self):
+        client = ByteportHttpPostClient(
+            byteport_api_store_url=self.byteport_api_store_url,
+            namespace_name=self.namespace,
+            api_key=self.key,
+            default_device_uid=self.device_uid
+        )
+
+        field_name = 'file_integer_raw'
+
+        # Will raise exception upon errors
+        client.store_file(field_name, './integer.txt')
 
     def test_should_store_test_file_and_bzip2_to_single_field_name_using_POST_client(self):
         client = ByteportHttpPostClient(

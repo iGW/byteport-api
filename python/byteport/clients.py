@@ -220,6 +220,23 @@ class ByteportHttpPostClient(AbstractByteportHttpClient):
             self.base64_encode_and_store(field_name, file_data, device_uid, timestamp, compression)
 
     #
+    #   Store a single file vs a field name with no encoding or compression
+    #
+    def store_file(self, field_name, path_to_file, device_uid=None, timestamp=None):
+
+        if timestamp is not None:
+            timestamp = self.auto_timestamp(timestamp)
+
+        with open(path_to_file, 'r') as content_file:
+            data = {field_name: content_file.read()}
+
+            if timestamp is not None:
+                timestamp = self.auto_timestamp(timestamp)
+                data['_ts'] = timestamp
+
+            self.store(data, device_uid)
+
+    #
     #    Store a single data block vs a field name to Byteport via HTTP POST
     #
     def base64_encode_and_store(self, field_name, fileobj,
