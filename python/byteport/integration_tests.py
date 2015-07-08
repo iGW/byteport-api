@@ -17,7 +17,7 @@ class TestHttpClients(unittest.TestCase):
 
     namespace = 'test'
     device_uid = 'byteport-api-tests'
-    key = 'd74f48f8375a32ca632fa49a'
+    key = 'd8a26587463268f88fea6aec'
     #key = 'TEST'
 
     def test_should_store_string_to_single_field_name_using_GET_client(self):
@@ -265,7 +265,40 @@ class TestHttpClients(unittest.TestCase):
         # Will raise exception upon errors
         client.base64_encode_and_store_file(field_name, './test_file_for_integration_tests.txt', compression='bzip2')
 
-class TestHttpClient(unittest.TestCase):
+    def test_should_store_directory(self):
+        client = ByteportHttpPostClient(
+            byteport_api_store_url=self.byteport_api_store_url,
+            namespace_name=self.namespace,
+            api_key=self.key,
+            default_device_uid=self.device_uid,
+            initial_heartbeat=False
+        )
+        client.store_directory('./test_directory', 'dir_storing_test')
+
+class PollingTests(unittest.TestCase):
+
+    #hostname = 'localhost:8000'
+    #hostname = 'acc.byteport.se'
+    hostname = 'api.byteport.se'
+    byteport_api_store_url = 'http://%s/services/store/' % hostname
+
+    namespace = 'test'
+    device_uid = 'byteport-api-tests'
+    key = 'd8a26587463268f88fea6aec'
+    #key = 'TEST'
+
+    def test_should_poll_directory_for_changes___needs_manual_change_to_trigger(self):
+        client = ByteportHttpPostClient(
+            byteport_api_store_url=self.byteport_api_store_url,
+            namespace_name=self.namespace,
+            api_key=self.key,
+            default_device_uid=self.device_uid,
+            initial_heartbeat=False
+        )
+        client.poll_directory_and_store_upon_content_change('./test_directory', 'dir_poller_test')
+
+
+class TestStompClient(unittest.TestCase):
 
     TEST_BROKERS = ['canopus']
 

@@ -6,10 +6,12 @@ import zlib
 import bz2
 import datetime
 import re
+import os
 import socks
 import json
 
 from urllib2 import HTTPError
+from utils import DictDiffer
 
 # Non standard imports, try to reduce if possible
 import pytz
@@ -235,6 +237,59 @@ class ByteportHttpPostClient(AbstractByteportHttpClient):
                 data['_ts'] = timestamp
 
             self.store(data, device_uid)
+
+    def sorted_ls(self, path):
+        mtime = lambda f: os.stat(os.path.join(path, f)).st_mtime
+        return list(sorted(os.listdir(path), key=mtime))
+
+    def store_directory(self, directory_path, device_uid, timestamp=None):
+
+        directory_data = dict()
+
+        # Get a list of files sorted by time
+        list_of_files_in_directory = self.sorted_ls(directory_path)
+
+        # Dump files with content to dictionary
+        for file_name in list_of_files_in_directory:
+            path_to_file = directory_path + '/' + file_name
+            with open(path_to_file, 'r') as content_file:
+                directory_data[file_name] = content_file.read()
+
+        self.store(directory_data, device_uid=device_uid, timestamp=timestamp)
+
+    def poll_directory_and_store_upon_content_change(self, directory_path, device_uid, timestamp=None, poll_interval=5):
+
+        # initial empty data
+        last_data = dict()
+
+        while True:
+            current_data = dict()
+
+            # Get a list of files sorted by time
+            list_of_files_in_directory = self.sorted_ls(directory_path)
+
+            # Dump files with content to dictionary
+            for file_name in list_of_files_in_directory:
+                path_to_file = directory_path + '/' + file_name
+                with open(path_to_file, 'r') as content_file:
+                    current_data[file_name] = content_file.read()
+
+            # This will obtain the keys that has changed value
+            changed_data = DictDiffer(current_data, last_data).changed()
+            added_data = DictDiffer(current_data, last_data).added()
+
+            last_data = current_data
+
+            data_to_send = dict()
+            for key in changed_data:
+                data_to_send[key] = current_data[key]
+
+            for key in added_data:
+                data_to_send[key] = current_data[key]
+
+            self.store(data_to_send, device_uid=device_uid, timestamp=timestamp)
+
+            time.sleep(poll_interval)
 
     #
     #    Store a single data block vs a field name to Byteport via HTTP POST
