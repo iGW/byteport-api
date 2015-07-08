@@ -31,7 +31,6 @@ A file is read and the content of the file is stored as value to the field calle
 ```
 from http_clients import ByteportHttpGetClient
 
-# Will send a single empty heart beat packet.
 client = ByteportHttpClient('myownspace', 'f00b4s3cretk3y', 'barDev1')
 
 client.store_file('temperature', './current_temperature')
