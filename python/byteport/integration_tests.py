@@ -295,7 +295,7 @@ class PollingTests(unittest.TestCase):
             default_device_uid=self.device_uid,
             initial_heartbeat=False
         )
-        client.poll_directory_and_store_upon_content_change('./test_directory', 'dir_poller_test')
+        client.poll_directory_and_store_upon_content_change('./test_directory/', 'dir_poller_test')
 
 
 class TestStompClient(unittest.TestCase):

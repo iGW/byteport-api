@@ -287,7 +287,8 @@ class ByteportHttpPostClient(AbstractByteportHttpClient):
             for key in added_data:
                 data_to_send[key] = current_data[key]
 
-            self.store(data_to_send, device_uid=device_uid, timestamp=timestamp)
+            if len(data_to_send) > 0:
+                self.store(data_to_send, device_uid=device_uid, timestamp=timestamp)
 
             time.sleep(poll_interval)
 
