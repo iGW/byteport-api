@@ -51,7 +51,7 @@ Pytz is so good it should be in the standard library. It is not yet, so we have 
 ### Python example 1 - storing numbers
 A common use-case is to send some data at regular intervals
 ```
-from http_clients import ByteportHttpGetClient
+from clients import ByteportHttpClient
 import time
 
 # Will send a single empty heart beat packet.
@@ -67,7 +67,7 @@ while True:
 ### Python example 2 - storing file content as value
 A file is read and the content of the file is stored as value to the field called temperature.
 ```
-from http_clients import ByteportHttpGetClient
+from clients import ByteportHttpClient
 
 client = ByteportHttpClient('myownspace', 'f00b4s3cretk3y', 'barDev1')
 
@@ -77,7 +77,7 @@ client.store_file('temperature', './current_temperature')
 ### Python example 3 - storing all files in a directory upon change
 This example make use of a convenience function that will continously poll a directory (default every 5 seconds, can be changed py parameter as below) for any change of the files. If a file is added, its content will be added to the next call. If a file is changed the new file content will be used. This makes integration with Byteport very simple - as whatever programming language you use, you can just dump data to a file in a directory and use the directory as the point of integration.
 ```
-from http_clients import ByteportHttpGetClient
+from clients import ByteportHttpClient
 
 client = ByteportHttpClient('myownspace', 'f00b4s3cretk3y', 'barDev1')
 
@@ -88,7 +88,7 @@ client.poll_directory_and_store_upon_content_change('/home/iot_user/measured_val
 ### Python example 4 - storing file content as value after encoding
 In this case a single file is read, compressed, encoded and sent to byteport with a few lines of code.
 ```
-from http_clients import ByteportHttpPostClient
+from clients import ByteportHttpClient
 
 client = ByteportHttpClient('myownspace', 'f00b4s3cretk3y', 'barDev1')
 
