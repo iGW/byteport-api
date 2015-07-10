@@ -125,8 +125,8 @@ class AbstractByteportClient:
 
 class AbstractByteportHttpClient(AbstractByteportClient):
 
-    DEFAULT_BYTEPORT_API_STORE_URL = 'https://api.byteport.se/services/store/'
-    DEFAULT_BYTEPORT_API_STORE_URL_HTTPS = 'https://api.byteport.se/services/store/'
+    DEFAULT_BYTEPORT_API_STORE_URL = 'http://api.byteport.se/services/store/'
+    DEFAULT_BYTEPORT_API_STORE_URL_HTTPS = 'http://api.byteport.se/services/store/'
 
     def __init__(self,
                  namespace_name,
