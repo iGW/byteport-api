@@ -4,7 +4,7 @@ __author__ = 'hans'
 from distutils.core import setup
 
 setup(name='Byteport API',
-      version='0.51',
+      version='0.52',
       description='Python Clients for Byteport (www.byteport.se)',
       author='Byteport developers',
       author_email='contact@byteport.se',
