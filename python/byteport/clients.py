@@ -257,6 +257,9 @@ class ByteportHttpPostClient(AbstractByteportHttpClient):
 
         self.store(directory_data, device_uid=device_uid, timestamp=timestamp)
 
+    '''
+        NOTE: Move to some kind of "layer-2" helper module instead.
+    '''
     def poll_directory_and_store_upon_content_change(self, directory_path, device_uid, timestamp=None, poll_interval=5):
 
         # initial empty data
@@ -278,8 +281,6 @@ class ByteportHttpPostClient(AbstractByteportHttpClient):
             changed_data = DictDiffer(current_data, last_data).changed()
             added_data = DictDiffer(current_data, last_data).added()
 
-            last_data = current_data
-
             data_to_send = dict()
             for key in changed_data:
                 data_to_send[key] = current_data[key]
@@ -288,7 +289,11 @@ class ByteportHttpPostClient(AbstractByteportHttpClient):
                 data_to_send[key] = current_data[key]
 
             if len(data_to_send) > 0:
-                self.store(data_to_send, device_uid=device_uid, timestamp=timestamp)
+                try:
+                    self.store(data_to_send, device_uid=device_uid, timestamp=timestamp)
+                    last_data = current_data
+                except Exception as e:
+                    logging.warn("Failed to store data, reason was: %s" % e)
 
             time.sleep(poll_interval)
 
