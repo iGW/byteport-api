@@ -258,7 +258,7 @@ class ByteportHttpPostClient(AbstractByteportHttpClient):
         self.store(directory_data, device_uid=device_uid, timestamp=timestamp)
 
     '''
-        NOTE: Move to some kind of "layer-2" helper module instead.
+        NOTE: Move to some kind of "layer-2" helper module instead. let implementor handle the loop?
     '''
     def poll_directory_and_store_upon_content_change(self, directory_path, device_uid, timestamp=None, poll_interval=5):
 
