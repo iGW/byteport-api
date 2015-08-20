@@ -16,7 +16,7 @@ Byteport accepts:
 * Text
 * Objects
 
-And so you may specify what kind of object you are storing by assigning a media type (formerly termed MIME-type) that will be supplied when fetching the data again.
+When you store Objects, you may specify what kind of object you are storing by assigning a media type (formerly termed MIME-type) that will be supplied when fetching the data again.
 
 ### Considerations to HTTP GET API
 While storing data usign HTTP GET calls might seem a bit backwards. But it is sometimes a nice feature for quick and dirty scenarios. The only caveat is the data size **limitation of 2 Kb**.
