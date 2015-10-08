@@ -37,10 +37,10 @@ field name etc.
 == Storing data using API-key method
 
 This method does not require the client to login to obtain the sessionid but
-instead you need to enable the namespace to accept writes by API-key using
-either GET or POST methods, or both. See the namespace security-tab in the
-Byteport instance (go here: https://www.byteport.se/manager/namespaces/, select
-namespace and open up “Security”).
+instead you need to enable the namespace to accept writes by API-keys.
+See the namespace security-tab in the Byteport instance
+(go here: https://www.byteport.se/manager/namespaces/, select namespace and
+open up “Security”).
 
 It is highly recommended to include a timestamp in each call as there is no
 guarantee the data is immediately parsed and stored.
@@ -53,7 +53,7 @@ guarantee the data is immediately parsed and stored.
 | URL
 | /api/v1/store/[namespace]/[device uid]/
 
-| Method(s)
+| Method
 | POST
 
 | Parameter(s)
@@ -73,14 +73,15 @@ _ts::
 === Examples
 
 ==== Example 1
-Storing a heartbeat using GET call, no data is supplied, that is supported:
+Storing a heartbeat using curl, no data is supplied, that is supported:
 
- $ curl "http://api.byteport.se/api/v1/store/mySpace/10/?_key=1D3c2"
+ $ curl --data "_key=1D3c2" "http://api.byteport.se/api/v1/store/mySpace/10/"
 
 ==== Example 2:
-When supplying data, you may also supply a timestamp in seconds since UNIX epoch. All other parameters (GET or POST) will be interpreted as application data, values can be any common number format or a string:
+When supplying data, you may also supply a timestamp in seconds since UNIX epoch. All other parameters will be 
+interpreted as application data, values can be any common number format or a string:
 
- $ curl "http://api.byteport.se/api/v1/store/mySpace/10/?_key=1D3c2&_ts=1410613385.123&temp=20&last_word=mom"
+ $ curl --data "_key=1D3c2&_ts=1410613385.123&temp=20&last_word=mom" "http://api.byteport.se/api/v1/store/mySpace/10/"
 
 == Log in
 To access stored data from a client, the client will first need to log in to obtain the sessionid cookie. The flow
@@ -100,7 +101,7 @@ The first thing to to is to make a simple GET call vs the login URL to obtain th
 | URL
 | /accounts/login/
 
-| Method(s)
+| Method
 | GET
 
 | Response Set-Cookie
@@ -117,7 +118,7 @@ Now supply the csrftoken as a cookie, as well as a request parameter in the POST
 | URL
 | /accounts/login/
 
-| Method(s)
+| Method
 | POST
 
 | Cookie
@@ -153,7 +154,7 @@ Note that the server may respond with a 302 redirect that can be omitted
 | URL
 | /api/v1/namespaces/
 
-| Method(s)
+| Method
 | POST
 
 | Cookie
@@ -191,7 +192,7 @@ Note that the server may respond with a 302 redirect that can be omitted
 | URL
 | /api/v1/device_query/
 
-| Method(s)
+| Method
 | GET
 
 | Cookie
@@ -241,7 +242,7 @@ The response of this call is somewhat cluttered. This is beeing fixed for APIv2.
 | URL
 | /api/v1/device/[namespace]/[uid]/
 
-| Method(s)
+| Method
 | GET
 
 | Cookie
@@ -315,7 +316,7 @@ The response of this call is somewhat cluttered. This is beeing fixed for APIv2.
 | URL
 | /api/v1/devices/[namespace]/
 
-| Method(s)
+| Method
 | GET
 
 | Cookie
@@ -362,7 +363,7 @@ full::
 | URL
 | /api/v1/timeseries/[namespace]/[uid]/[field name]/
 
-| Method(s)
+| Method
 | GET
 
 | Cookie
@@ -449,7 +450,7 @@ Using the *r* as obtained using the above timeseries range call, the details for
 | URL
 | /api/v1/value/[namespace]/[uid]/[field name]/[value_ref]/
 
-| Method(s)
+| Method
 | GET
 
 | Cookie
@@ -491,7 +492,7 @@ and unencoded before sent to the client by default. The same *r* is used as in t
 | URL
 | /api/v1/download/value/[namespace]/[uid]/[field name]/[value_ref]/
 
-| Method(s)
+| Method
 | GET
 
 | Cookie
