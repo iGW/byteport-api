@@ -3,13 +3,15 @@ Collection of open source (BSD Licence) code examples useful for connecting to t
 
 Read all about it here
 
-www.byteport.se and 
+https://www.byteport.se/home and 
 
 Sign up for an account to get started.
 
 It is **free** for small volume users, such as hobbyists, academics and start-ups.
 
 ## API documentation
+You can find the API v1 specification here: https://github.com/iGW/byteport-api/blob/master/APIv1.adoc
+
 ### Byteport data model
 Byteport accepts:
 * Numbers
