@@ -1,33 +1,49 @@
 = Byteport HTTP APIv1
 
+2015-09-30
+
 == Disclaimer
 The Byteport HTTP APIv2 is under development with many additional functions.
 The v1 API described in this document will be supported until 2016-12-31.
 
 == Introduction
-If you are not instructed otherwise, all calls should be made to the following URL
+If you are not instructed otherwise, all calls should be made against the following
+URL
 
 https://api.byteport.se
 
-While it may work to access www.byteport.se for the same purpose, it may not be so in the future.
+While it may work to access www.byteport.se for the same purpose, it may not be
+so in the future.
 
-Whenever a GET-call is made, the client receives a cookie named csrftoken. This token must be supplied in all calls made below as csrftoken. In addition, the same token must be supplied as the form data parameter csrfmiddlewaretoken in any POST calls made. The csrftoken is a Cross Site Request Forgery token and is a security measure.
+Whenever a GET-call is made, the client receives a cookie named csrftoken. This
+token must be supplied in all calls made below as csrftoken. In addition, the
+same token must be supplied as the form data parameter csrfmiddlewaretoken in
+any POST calls made. The csrftoken is a Cross Site Request Forgery token and
+is a security measure.
 
-The client must then login correctly to obtain the sessionid cookie before any other service calls can be made. A HTTP POST call is made in this step.
+The client must then login correctly to obtain the sessionid cookie before any
+other service calls can be made. A HTTP POST call is made in this step.
 
 Note that the responses given by the server is shown with a yellow background.
 
-To be able to login and use the data accessing APIs you must have met the following prerequisites:
+To be able to login and use the data accessing APIs you must have met the
+following prerequisites:
 
 . Have a valid username and password to the Byteport instance you are accessing
 . The user must have access to the namespace you are working against.
-. Knowledge and understanding of the concepts namespace, device uid and field name etc.
+. Knowledge and understanding of the concepts namespace, device uid and
+field name etc.
 
 == Storing data using API-key method
 
-This method does not require the client to login to obtain the sessionid but instead you need to enable the namespace
-to accept writes by API-key using either GET or POST methods, or both. See the namespace security-tab in the Byteport
-instance (go here: https://www.byteport.se/manager/namespaces/, select namespace and open up “Security”).
+This method does not require the client to login to obtain the sessionid but
+instead you need to enable the namespace to accept writes by API-key using
+either GET or POST methods, or both. See the namespace security-tab in the
+Byteport instance (go here: https://www.byteport.se/manager/namespaces/, select
+namespace and open up “Security”).
+
+It is highly recommended to include a timestamp in each call as there is no
+guarantee the data is immediately parsed and stored.
 
 === Write
 
@@ -35,13 +51,19 @@ instance (go here: https://www.byteport.se/manager/namespaces/, select namespace
 |===
 
 | URL
-| /apiv1/store/
+| /apiv1/store/[namespace]/[device uid]/
 
 | Method(s)
-| GET (2kB limit), POST (1 MB limit)
+| POST
 
 | Parameter(s)
-| _key _ts [any other is interpreted as data field names]
+|
+_key::
+ The namespace API key
+_ts::
+ UNIX Timestamp in seconds since epoch.
+[any other]::
+ Interpreted as data fields
 
 | Response Body
 | N/A
@@ -53,4 +75,111 @@ instance (go here: https://www.byteport.se/manager/namespaces/, select namespace
 ==== Example 1
 Storing a heartbeat using GET call, no data is supplied, that is supported:
 
-`$ curl "http://api.byteport.se/apiv1/store/mySpace/10/?_key=1D3c2"`
+ $ curl "http://api.byteport.se/apiv1/store/mySpace/10/?_key=1D3c2"
+
+==== Example 2:
+When supplying data, you may also supply a timestamp in seconds since UNIX epoch. All other parameters (GET or POST) will be interpreted as application data, values can be any common number format or a string:
+
+ $ curl "http://api.byteport.se/apiv1/store/mySpace/10/?_key=1D3c2&_ts=1410613385.123&temp=20&last_word=mom"
+
+== Log in
+To access stored data from a client, the client will first need to log in to obtain the sessionid cookie. The flow
+to complete a successful login vs. Byteport is as follows
+
+. Obtain *csrftoken*
+. Perform the actual login, include csrftoken as Cookie and set *username*, *password*, and *csrfmiddlewaretoken*
+as POST parameters.
+. Store the returned *sessionid* cookie for future API requests. Ignore the 302 redirects.
+
+=== Obtain CSRFTOKEN
+The first thing to to is to make a simple GET call vs the login URL to obtain the csrftoken cookie.
+
+[cols="h,5a"]
+|===
+
+| URL
+| /accounts/login/
+
+| Method(s)
+| GET
+
+| Response Set-Cookie
+| csrftoken
+
+|===
+
+=== Perform the actual login
+Now supply the csrftoken as a cookie, as well as a request parameter in the POST call together with the username and password:
+
+[cols="h,5a"]
+|===
+
+| URL
+| /accounts/login/
+
+| Method(s)
+| POST
+
+| Cookie
+| csrftoken (*must* be supplied regardless of also being set as POST data)
+
+| Parameter(s)
+|
+username::
+password::
+csrfmiddlewaretoken::
+ The CrossSiteRequestForgery token obtained as a Set-cooke in the GET request earlier.
+
+| Response Set-Cookie
+| csrftoken, sessionid
+
+| Response Body
+| N/A
+
+|===
+
+The server will respond with a Set-Cooke called *sessionid* that must be
+included in any subsequent call where the logged in context is needed.
+
+Note that the server may respond with a 302 redirect that can be omitted
+
+== Data access methods
+
+=== List namespaces
+
+[cols="h,5a"]
+|===
+
+| URL
+| /accounts/login/
+
+| Method(s)
+| POST
+
+| Cookie
+| csrftoken
+
+| Parameter(s)
+|
+(none)
+
+| Content type
+| application/json
+
+| Response Body
+|
+....
+[
+    {
+        data_survival_time: "0",
+        name: "test",
+        read_by_key: "True",
+        http_write_method: "both",
+        read_key: "",
+        write_by_key: "True",
+        write_key: "FOOBARKEY",
+        description: "A very pleasant space"
+    }
+]
+....
+|===
