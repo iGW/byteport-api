@@ -372,7 +372,7 @@ full::
 | Parameter(s)
 |
 from::
- An ISO8601 datetime.
+ An ISO8601 datetime, %Y-%m-%dT%H:%M:%S. Example 2015-04-01T13:14:15
 to::
  An ISO8601 datetime.
 timedelta_minutes::
