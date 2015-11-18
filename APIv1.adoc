@@ -1,9 +1,4 @@
 = Byteport HTTP APIv1
-Hans Eklund <hans.eklund@igw.se>
-:doctype: book
-:source-highlighter: coderay
-:listing-caption: Listing
-:pdf-page-size: A4
 
 Byteport HTTP REST API documentation
 
@@ -54,17 +49,25 @@ guarantee the data is immediately parsed and stored.
 
 [cols="h,5a"]
 |===
-| URL           | /api/v1/store/[namespace]/[device uid]/
-| Method        | POST
-| Parameter(s)  |
-                    _key::
-                     The namespace API key
-                    _ts::
-                     UNIX Timestamp in seconds since epoch.
-                    [any other]::
-                     Interpreted as data fields
 
-| Response Body | N/A
+| URL
+| /api/v1/store/[namespace]/[device uid]/
+
+| Method
+| POST
+
+| Parameter(s)
+|
+_key::
+ The namespace API key
+_ts::
+ UNIX Timestamp in seconds since epoch.
+[any other]::
+ Interpreted as data fields
+
+| Response Body
+| N/A
+
 |===
 
 === Examples
@@ -78,7 +81,7 @@ Storing a heartbeat using curl, no data is supplied, that is supported:
 When supplying data, you may also supply a timestamp in seconds since UNIX epoch. All other parameters will be 
 interpreted as application data, values can be any common number format or a string:
 
- $ curl --data "_key=1D3c2&_ts=1410613385.123&temp=20&last_word=mom" "http://api.byteport.se/api/v1/store/mySpace/10/"
+ $ curl --data "_key=1D3c2&_ts=1410613385.123&temp=20&last_word=mom" "http://api.byteport.se/api/v1/timeseries/mySpace/10/"
 
 == Log in
 To access stored data from a client, the client will first need to log in to obtain the sessionid cookie. The flow
