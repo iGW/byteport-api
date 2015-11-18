@@ -1,6 +1,11 @@
 = Byteport HTTP APIv1
+Hans Eklund <hans.eklund@igw.se>
+:doctype: book
+:source-highlighter: coderay
+:listing-caption: Listing
+:pdf-page-size: A4
 
-2015-09-30
+Byteport HTTP REST API documentation
 
 == Disclaimer
 The Byteport HTTP APIv2 is under development with many additional functions.
@@ -49,25 +54,17 @@ guarantee the data is immediately parsed and stored.
 
 [cols="h,5a"]
 |===
+| URL           | /api/v1/store/[namespace]/[device uid]/
+| Method        | POST
+| Parameter(s)  |
+                    _key::
+                     The namespace API key
+                    _ts::
+                     UNIX Timestamp in seconds since epoch.
+                    [any other]::
+                     Interpreted as data fields
 
-| URL
-| /api/v1/store/[namespace]/[device uid]/
-
-| Method
-| POST
-
-| Parameter(s)
-|
-_key::
- The namespace API key
-_ts::
- UNIX Timestamp in seconds since epoch.
-[any other]::
- Interpreted as data fields
-
-| Response Body
-| N/A
-
+| Response Body | N/A
 |===
 
 === Examples
@@ -90,7 +87,7 @@ to complete a successful login vs. Byteport is as follows
 . Obtain *csrftoken*
 . Perform the actual login, include csrftoken as Cookie and set *username*, *password*, and *csrfmiddlewaretoken*
 as POST parameters.
-. Store the returned *sessionid* cookie for future API requests. Ignore the 302 redirects.
+. Store the returned *sessionid* cookie for future API requests.
 
 === Obtain CSRFTOKEN
 The first thing to to is to make a simple GET call vs the login URL to obtain the csrftoken cookie.
@@ -99,7 +96,7 @@ The first thing to to is to make a simple GET call vs the login URL to obtain th
 |===
 
 | URL
-| /accounts/login/
+| /api/v1/login/
 
 | Method
 | GET
@@ -116,7 +113,7 @@ Now supply the csrftoken as a cookie, as well as a request parameter in the POST
 |===
 
 | URL
-| /accounts/login/
+| /api/v1/login/
 
 | Method
 | POST
@@ -142,7 +139,24 @@ csrfmiddlewaretoken::
 The server will respond with a Set-Cooke called *sessionid* that must be
 included in any subsequent call where the logged in context is needed.
 
-Note that the server may respond with a 302 redirect that can be omitted
+== Log out
+Log out by doing any kind of request to the log out URL. Server will respond with 200 OK upon successful logout. This
+will invalidate your current sessionid, and you will need to obtain a new one by logging in again.
+
+[cols="h,5a"]
+|===
+
+| URL
+| /api/v1/logout/
+
+| Method
+| Any
+
+| Response code
+| 200
+
+
+|===
 
 == Data access methods
 

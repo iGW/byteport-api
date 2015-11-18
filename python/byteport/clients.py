@@ -150,6 +150,11 @@ class ByteportHttpClient(AbstractByteportClient):
     ISO8601 = '%Y-%m-%dT%H:%M:%S.%f'
 
     # APIV1 URLS
+    LOGIN_PATH = '/api/v1/login/'
+    LOGOUT_PATH = '/api/v1/logout/'
+    SESSION_PATH = '/api/v1/session/'
+    ECHO_PATH = '/api/v1/echo/'
+
     LIST_NAMESPACES = '/api/v1/namespaces/'
     QUERY_DEVICES = '/api/v1/search_devices/'
     GET_DEVICE = '/api/v1/device/%s/%s/'
@@ -205,8 +210,9 @@ class ByteportHttpClient(AbstractByteportClient):
                 # This can also act as heart beat, no need to send data to signal "online" in Byteport
                 self.store()
 
-    def login(self, username, password, login_path='/accounts/login'):
-        url = '%s://%s%s/' % (self.DEFAULT_BYTEPORT_API_PROTOCOL, self.byteport_api_hostname, login_path)
+    def login(self, username, password, login_path=LOGIN_PATH):
+
+        url = '%s://%s%s' % (self.DEFAULT_BYTEPORT_API_PROTOCOL, self.byteport_api_hostname, login_path)
 
         # This will induce a GET-call to obtain the csrftoken needed for the actual login
         self.make_request(url)
@@ -218,11 +224,14 @@ class ByteportHttpClient(AbstractByteportClient):
             raise ByteportClientException("Failed to extract csrftoken.")
 
         # And make the POST-call to login
-        self.make_request(url=url,
-                          post_data={'username': username,
-                                     'password': password,
-                                     'csrfmiddlewaretoken': csrftoken}
-                          )
+        try:
+            self.make_request(url=url,
+                              post_data={'username': username,
+                                         'password': password,
+                                         'csrfmiddlewaretoken': csrftoken}
+                              )
+        except ByteportClientForbiddenException as e:
+            raise ByteportLoginFailedException("Failed to login user with name %s" % username)
 
         # Make sure the sessionid cookie is present in the cookie jar now
         for cookie in self.cookiejar:
@@ -299,13 +308,11 @@ class ByteportHttpClient(AbstractByteportClient):
         except HTTPError as http_error:
             logging.error(u'HTTPError accessing %s, Error was: %s' % (url, http_error))
             if http_error.code == 403:
-                message = u'Verify that the namespace %s does allow writes by HTTP, and also if the correct' \
-                          u'request method is set and usd (ie GET and/or POST), and that the ' \
-                          u'API key is correct.' % self.namespace_name
+                message = u'403, You were not allowed to access the requested resource.'
                 logging.info(message)
                 raise ByteportClientForbiddenException(message)
             if http_error.code == 404:
-                message = u'Make sure the device(s) is registered under ' \
+                message = u'404, Make sure the device(s) is registered under ' \
                           u'namespace %s.' % self.namespace_name
                 logging.info(message)
                 raise ByteportClientDeviceNotFoundException(message)

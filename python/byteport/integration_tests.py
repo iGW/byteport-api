@@ -10,13 +10,14 @@ NOTE: All tests here need a Byteport instance to communicate with
 '''
 class TestHttpClients(unittest.TestCase):
 
-    byteport_api_hostname = 'api.byteport.se'
-    #byteport_api_hostname = 'acc.byteport.se'
-    #byteport_api_hostname = 'localhost:8000'
+    PRODUCTION = ('api.byteport.se', 'd8a26587463268f88fea6aec')
+    ACCEPTANCE = ('acc.byteport.se', 'd74f48f8375a32ca632fa49a')
+    LOCALHOST = ('localhost:8000', 'TEST')
 
-    key = 'd8a26587463268f88fea6aec'
-    #key = 'd74f48f8375a32ca632fa49a'
-    #key = 'TEST'
+    TEST_ENVIRONMENT = PRODUCTION
+
+    byteport_api_hostname = TEST_ENVIRONMENT[0]
+    key = TEST_ENVIRONMENT[1]
 
     namespace = 'test'
     device_uid = 'byteport-api-tests'
@@ -296,7 +297,7 @@ class TestHttpClients(unittest.TestCase):
         )
 
         try:
-            client.login('user', 'f00passb4r')
+            client.login('fakeuser', 'f00passb4r')
         except ByteportLoginFailedException:
             return
 
