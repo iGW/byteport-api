@@ -9,6 +9,10 @@ Sign up for an account to get started.
 
 It is **free** for small volume users, such as hobbyists, academics and start-ups.
 
+If you would like to build a web-application built upon this API using only HTML and Javascript, you should check out 
+one of our other open git-repositorys: https://github.com/iGW/byteport-application-skeletons for some fully working
+project skeletons that should get you started in no time.
+
 ## API documentation
 You can find the API v1 specification here: https://github.com/iGW/byteport-api/blob/master/APIv1.adoc
 
