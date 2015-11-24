@@ -14,7 +14,7 @@ class TestHttpClients(unittest.TestCase):
     ACCEPTANCE = ('acc.byteport.se', 'd74f48f8375a32ca632fa49a')
     LOCALHOST = ('localhost:8000', 'TEST')
 
-    TEST_ENVIRONMENT = PRODUCTION
+    TEST_ENVIRONMENT = LOCALHOST
 
     byteport_api_hostname = TEST_ENVIRONMENT[0]
     key = TEST_ENVIRONMENT[1]
@@ -22,8 +22,8 @@ class TestHttpClients(unittest.TestCase):
     namespace = 'test'
     device_uid = 'byteport-api-tests'
 
-    test_user = 't3stusr'
-    test_password = 't3stusr'
+    test_user = 'admin'
+    test_password = 'admin'
 
     def test_should_store_string_to_single_field_name_using_GET_client(self):
         client = ByteportHttpClient(
@@ -331,6 +331,54 @@ class TestHttpClients(unittest.TestCase):
 
         for device in result:
             self.assertTrue(len(device['device_type']) > 0)
+
+        #Devices
+        result = client.get_devices('test')
+        self.assertTrue( len(result) > 0 )
+
+        result = client.get_devices('test', "FOOBAR.")
+        self.assertTrue( len(result) == 0, "Should not find any device with id 636744, found: %s" % len(result) )
+
+        result = client.get_devices('test', "TestGW.")
+        self.assertTrue( len(result) == 1, "Should only find one device with uid=TestGW., found %s" % len(result) )
+        self.assertTrue( result[0][u'uid'] == u'TestGW', 'Device with id 1 should be the test GW, but was: "%s"' % result[0][u'uid'])
+
+
+        #Devicetypes
+        result = client.get_device_types('test')
+        self.assertTrue( len(result) > 0 )
+
+        result = client.get_device_types('test', "636744")
+        self.assertTrue( len(result) == 0, "Should not find any devicetype with id 636744, found: %s" % len(result) )
+
+        result = client.get_device_types('test', "1")
+        self.assertTrue( len(result) == 1, "Should only find one devicetype with id=1, found %s" % len(result) )
+        self.assertTrue( result[0][u'name'] == u'Generic Test Gateway', 'Device with id 1 should be the test GW, but was: "%s"' % result[0][u'name'])
+
+
+        #device firmwares
+        result = client.get_firmwares('test', device_type_id='1')
+        self.assertTrue( len(result) > 0 )
+
+        result = client.get_firmwares('test', device_type_id="1", key="636744")
+        self.assertTrue( len(result) == 0, "Should not find any firmware with id 636744, found: %s" % len(result) )
+
+        result = client.get_firmwares('test', device_type_id="1", key="2")
+        self.assertTrue( len(result) == 1, "Should only find one device with id=1, found %s" % len(result) )
+        self.assertTrue( result[0][u'filesize'] == u'165613', 'Device fw with id 2 should have size 165613, but was: "%s"' % result[0][u'filesize'])
+
+
+        #device field-definitions
+        result = client.get_field_definitions('test', device_type_id='2')
+        self.assertTrue( len(result) > 0 )
+
+        result = client.get_field_definitions('test', device_type_id="2", key="636744")
+        self.assertTrue( len(result) == 0, "Should not find any field definition with id 636744, found: %s" % len(result) )
+
+        result = client.get_field_definitions('test', device_type_id="2", key="5")
+        self.assertTrue( len(result) == 1, "Should only find one field definition with id=1, found %s" % len(result) )
+        self.assertTrue( result[0][u'name'] == u'b64_jsons', 'Device field 5 of test gw should be "b64_jsons", but was: "%s"' % result[0][u'name'])
+
 
         # Load time-series data
         to_time = datetime.datetime.now()
