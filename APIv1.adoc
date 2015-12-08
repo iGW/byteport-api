@@ -24,8 +24,6 @@ is a security measure.
 The client must then login correctly to obtain the sessionid cookie before any
 other service calls can be made. A HTTP POST call is made in this step.
 
-Note that the responses given by the server is shown with a yellow background.
-
 To be able to login and use the data accessing APIs you must have met the
 following prerequisites:
 
@@ -172,7 +170,7 @@ will invalidate your current sessionid, and you will need to obtain a new one by
 | /api/v1/namespaces/
 
 | Method
-| POST
+| GET
 
 | Cookie
 | csrftoken, sessionid
