@@ -155,10 +155,13 @@ class ByteportHttpClient(AbstractByteportClient):
     SESSION_PATH = '/api/v1/session/'
     ECHO_PATH = '/api/v1/echo/'
 
-    LIST_NAMESPACES = '/api/v1/namespaces/'
-    QUERY_DEVICES = '/api/v1/search_devices/'
-    GET_DEVICE = '/api/v1/device/%s/%s/'
-    LIST_DEVICES = '/api/v1/devices/%s/'
+    LIST_NAMESPACES      = '/api/v1/namespace/'
+    QUERY_DEVICES        = '/api/v1/search_devices/'
+    GET_DEVICE           = '/api/v1/namespace/%s/device/'
+    GET_DEVICE_TYPE      = '/api/v1/namespace/%s/device_type/'
+    GET_FIRMWARE         = '/api/v1/namespace/%s/device_type/%s/firmware/'
+    GET_FIELD_DEFINITION = '/api/v1/namespace/%s/device_type/%s/field_definition/'
+
     LOAD_TIMESERIES_DATA = '/api/v1/timeseries/%s/%s/%s/'
 
     def __init__(self,
@@ -261,18 +264,62 @@ class ByteportHttpClient(AbstractByteportClient):
 
         return json.loads(self.make_request(url).read())
 
+#TODO: Deprecated. Remove at some point.
     def get_device(self, namespace, uid):
         base_url = '%s://%s%s' % (self.DEFAULT_BYTEPORT_API_PROTOCOL, self.byteport_api_hostname, self.GET_DEVICE)
-        url = base_url % (namespace, uid)
 
+        encoded_data = urllib.urlencode( {'uid':u'%s' % uid } )
+        url = base_url % (namespace) + "?%s" % encoded_data
         return json.loads(self.make_request(url).read())
 
+#TODO: Deprecated. Remove at some point.
     def list_devices(self, namespace, full=False):
-        base_url = '%s://%s%s' % (self.DEFAULT_BYTEPORT_API_PROTOCOL, self.byteport_api_hostname, self.LIST_DEVICES)
+        base_url = '%s://%s%s' % (self.DEFAULT_BYTEPORT_API_PROTOCOL, self.byteport_api_hostname, self.GET_DEVICE)
         request_parameters = {'full': u'%s' % full}
         encoded_data = urllib.urlencode(request_parameters)
 
         url = base_url % namespace + '?%s' % encoded_data
+
+        return json.loads(self.make_request(url).read())
+
+    def get_devices(self, namespace, key=None):
+        base_url = '%s://%s%s' % (self.DEFAULT_BYTEPORT_API_PROTOCOL, self.byteport_api_hostname, self.GET_DEVICE)
+        request_parameters = {}
+        if( key is not None ):
+            request_parameters['key'] = key
+
+        url = base_url % namespace + '?%s' % urllib.urlencode(request_parameters)
+
+        return json.loads(self.make_request(url).read())
+
+
+    def get_device_types(self, namespace, key=None):
+        base_url = '%s://%s%s' % (self.DEFAULT_BYTEPORT_API_PROTOCOL, self.byteport_api_hostname, self.GET_DEVICE_TYPE)
+        request_parameters = {}
+        if( key is not None ):
+            request_parameters['key'] = key
+
+        url = base_url % namespace + '?%s' % urllib.urlencode(request_parameters)
+
+        return json.loads(self.make_request(url).read())
+
+    def get_firmwares(self, namespace, device_type_id, key=None):
+        base_url = '%s://%s%s' % (self.DEFAULT_BYTEPORT_API_PROTOCOL, self.byteport_api_hostname, self.GET_FIRMWARE)
+        request_parameters = {}
+        if( key is not None ):
+            request_parameters['key'] = key
+
+        url = base_url % (namespace, device_type_id) + '?%s' % urllib.urlencode(request_parameters)
+
+        return json.loads(self.make_request(url).read())
+
+    def get_field_definitions(self, namespace, device_type_id, key=None):
+        base_url = '%s://%s%s' % (self.DEFAULT_BYTEPORT_API_PROTOCOL, self.byteport_api_hostname, self.GET_FIELD_DEFINITION)
+        request_parameters = {}
+        if key is not None:
+            request_parameters['key'] = key
+
+        url = base_url % (namespace, device_type_id) + '?%s' % urllib.urlencode(request_parameters)
 
         return json.loads(self.make_request(url).read())
 
