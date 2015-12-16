@@ -1,0 +1,2 @@
+http://svn.codehaus.org/stomp/trunk/c/
+Revision 90

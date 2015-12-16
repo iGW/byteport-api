@@ -1,0 +1,2 @@
+#!/bin/bash
+./byteport-stomp-client -g robban-gw-0 -q /queue/device_messages_rubicodev.robban-gw-0 -n rubicodev -s broker.byteport.se -p 61613 -m '[{ "uid":"robban-gw-0", "cmd":"clear_whitelist" }]'
