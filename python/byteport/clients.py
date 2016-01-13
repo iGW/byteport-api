@@ -140,29 +140,29 @@ class ByteportHttpClient(AbstractByteportClient):
     DEFAULT_BYTEPORT_API_PROTOCOL = 'http'
     DEFAULT_BYTEPORT_API_HOSTNAME = 'api.byteport.se'
 
-    # Storing
-    DEFAULT_BYTEPORT_STORE_PATH = '/api/v1/timeseries/'
-    DEFAULT_BYTEPORT_API_STORE_URL = '%s://%s%s' % (DEFAULT_BYTEPORT_API_PROTOCOL,
-                                                    DEFAULT_BYTEPORT_API_HOSTNAME,
-                                                    DEFAULT_BYTEPORT_STORE_PATH)
-
     # DATETIME FORMAT
     ISO8601 = '%Y-%m-%dT%H:%M:%S.%f'
 
     # APIV1 URLS
-    LOGIN_PATH = '/api/v1/login/'
-    LOGOUT_PATH = '/api/v1/logout/'
-    SESSION_PATH = '/api/v1/session/'
-    ECHO_PATH = '/api/v1/echo/'
+    LOGIN_PATH                  = '/api/v1/login/'
+    LOGOUT_PATH                 = '/api/v1/logout/'
+    SESSION_PATH                = '/api/v1/session/'
+    ECHO_PATH                   = '/api/v1/echo/'
 
-    LIST_NAMESPACES      = '/api/v1/namespace/'
-    QUERY_DEVICES        = '/api/v1/search_devices/'
-    GET_DEVICE           = '/api/v1/namespace/%s/device/'
-    GET_DEVICE_TYPE      = '/api/v1/namespace/%s/device_type/'
-    GET_FIRMWARE         = '/api/v1/namespace/%s/device_type/%s/firmware/'
-    GET_FIELD_DEFINITION = '/api/v1/namespace/%s/device_type/%s/field_definition/'
+    LIST_NAMESPACES             = '/api/v1/namespace/'
+    QUERY_DEVICES               = '/api/v1/search_devices/'
+    GET_DEVICE                  = '/api/v1/namespace/%s/device/'
+    GET_DEVICE_TYPE             = '/api/v1/namespace/%s/device_type/'
+    GET_FIRMWARE                = '/api/v1/namespace/%s/device_type/%s/firmware/'
+    GET_FIELD_DEFINITION        = '/api/v1/namespace/%s/device_type/%s/field_definition/'
 
-    LOAD_TIMESERIES_DATA = '/api/v1/timeseries/%s/%s/%s/'
+    LOAD_TIMESERIES_DATA        = '/api/v1/timeseries/%s/%s/%s/'
+    DEFAULT_BYTEPORT_STORE_PATH = '/api/v1/timeseries/'
+
+    #
+    DEFAULT_BYTEPORT_API_STORE_URL = '%s://%s%s' % (DEFAULT_BYTEPORT_API_PROTOCOL,
+                                                    DEFAULT_BYTEPORT_API_HOSTNAME,
+                                                    DEFAULT_BYTEPORT_STORE_PATH)
 
     def __init__(self,
                  namespace_name=None,
@@ -268,14 +268,14 @@ class ByteportHttpClient(AbstractByteportClient):
     def get_device(self, namespace, uid):
         base_url = '%s://%s%s' % (self.DEFAULT_BYTEPORT_API_PROTOCOL, self.byteport_api_hostname, self.GET_DEVICE)
 
-        encoded_data = urllib.urlencode( {'uid':u'%s' % uid } )
+        encoded_data = urllib.urlencode( {'uid':u'%s' % uid, 'depth': 1 } )
         url = base_url % (namespace) + "?%s" % encoded_data
         return json.loads(self.make_request(url).read())
 
 #TODO: Deprecated. Remove at some point.
-    def list_devices(self, namespace, full=False):
+    def list_devices(self, namespace, depth=0):
         base_url = '%s://%s%s' % (self.DEFAULT_BYTEPORT_API_PROTOCOL, self.byteport_api_hostname, self.GET_DEVICE)
-        request_parameters = {'full': u'%s' % full}
+        request_parameters = {'depth': u'%s' % depth}
         encoded_data = urllib.urlencode(request_parameters)
 
         url = base_url % namespace + '?%s' % encoded_data
@@ -323,10 +323,37 @@ class ByteportHttpClient(AbstractByteportClient):
 
         return json.loads(self.make_request(url).read())
 
-    def load_timeseries_data(self, namespace, uid, field_name, from_time, to_time):
+    def load_timeseries_data_range(self, namespace, uid, field_name, from_time, to_time):
+        """
+        Load data using a datetime objects to define an exact range to fetch
+
+        :param namespace:
+        :param uid:
+        :param field_name:
+        :param from_time:
+        :param to_time:
+        :return:
+        """
         base_url = '%s://%s%s' % (self.DEFAULT_BYTEPORT_API_PROTOCOL, self.byteport_api_hostname, self.LOAD_TIMESERIES_DATA)
         request_parameters = {'from': from_time.strftime(self.ISO8601), 'to': to_time.strftime(self.ISO8601)}
         encoded_data = urllib.urlencode(request_parameters)
+
+        url = base_url % (namespace, uid, field_name) + '?%s' % encoded_data
+
+        return json.loads(self.make_request(url).read())
+
+    def load_timeseries_data(self, namespace, uid, field_name, **kwargs):
+        """
+        Load data from byteport using various arguments supplied as request parameters to Byteport
+
+        :param namespace:
+        :param uid:
+        :param field_name:
+        :param kwargs:
+        :return:
+        """
+        base_url = '%s://%s%s' % (self.DEFAULT_BYTEPORT_API_PROTOCOL, self.byteport_api_hostname, self.LOAD_TIMESERIES_DATA)
+        encoded_data = urllib.urlencode(kwargs)
 
         url = base_url % (namespace, uid, field_name) + '?%s' % encoded_data
 

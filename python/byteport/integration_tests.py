@@ -315,31 +315,33 @@ class TestHttpClients(unittest.TestCase):
         self.assertTrue(len(result) > 0)
 
         # Query for matching devices
-        result = client.query_devices('test', full=False, limit=10)
-        self.assertTrue(len(result) > 0)
+        result = client.query_devices('test*', full=False, limit=10)
+        self.assertTrue(len(result) > 1)
 
         # Load one device
         result = client.get_device('test', '6000')
         self.assertEqual(result[0]['guid'], 'test.6000')
 
-        # List devices in one namespace, load both as list and full
-        result = client.list_devices('test', full=False)
-        for guid in result:
-            self.assertTrue(len(guid) > 0)
-
-        result = client.list_devices('test', full=True)
+        # Obtain a list of all UIDs in this namespace
+        result = client.list_devices('test')
 
         for device in result:
-            self.assertTrue(len(device['device_type']) > 0)
+            self.assertTrue(len(device['uid']) > 0)
+
+        # Obtain a list of Devices (with contents)
+        result = client.list_devices('test', 1)
+
+        for device in result:
+            self.assertTrue(len(device['active']) > 0)
 
         #Devices
         result = client.get_devices('test')
         self.assertTrue( len(result) > 0 )
 
-        result = client.get_devices('test', "FOOBAR.")
+        result = client.get_devices('test', "FOOBAR")
         self.assertTrue( len(result) == 0, "Should not find any device with id 636744, found: %s" % len(result) )
 
-        result = client.get_devices('test', "TestGW.")
+        result = client.get_devices('test', "TestGW")
         self.assertTrue( len(result) == 1, "Should only find one device with uid=TestGW., found %s" % len(result) )
         self.assertTrue( result[0][u'uid'] == u'TestGW', 'Device with id 1 should be the test GW, but was: "%s"' % result[0][u'uid'])
 
@@ -365,7 +367,7 @@ class TestHttpClients(unittest.TestCase):
 
         result = client.get_firmwares('test', device_type_id="1", key="2")
         self.assertTrue( len(result) == 1, "Should only find one device with id=1, found %s" % len(result) )
-        self.assertTrue( result[0][u'filesize'] == u'165613', 'Device fw with id 2 should have size 165613, but was: "%s"' % result[0][u'filesize'])
+        self.assertTrue( result[0][u'filesize'] == u'6', 'Device fw with id 2 should have size 6, but was: "%s"' % result[0][u'filesize'])
 
 
         #device field-definitions
@@ -379,13 +381,25 @@ class TestHttpClients(unittest.TestCase):
         self.assertTrue( len(result) == 1, "Should only find one field definition with id=1, found %s" % len(result) )
         self.assertTrue( result[0][u'name'] == u'b64_jsons', 'Device field 5 of test gw should be "b64_jsons", but was: "%s"' % result[0][u'name'])
 
+    def test_should_login_and_access_timeseries_data(self):
+        client = ByteportHttpClient(
+            byteport_api_hostname=self.byteport_api_hostname
+        )
+
+        client.login(self.test_user, self.test_password)
+
+        # List Namespaces
+        result = client.list_namespaces()
+        self.assertTrue(len(result) > 0)
 
         # Load time-series data
         to_time = datetime.datetime.now()
         from_time = to_time - datetime.timedelta(hours=1)
-        result = client.load_timeseries_data('test', '6000', 'temp', from_time, to_time)
+        result = client.load_timeseries_data_range('test', '6000', 'temp', from_time, to_time)
         self.assertEqual(result['meta']['path'], u'test.6000.temp')
 
+        result = client.load_timeseries_data('test', '6000', 'temp', timedelta_minutes=180)
+        self.assertEqual(result['meta']['path'], u'test.6000.temp')
 
 class PollingTests(unittest.TestCase):
 

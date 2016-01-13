@@ -1,6 +1,6 @@
-= Byteport HTTP APIv1
+= Byteport HTTP API v1.1
 
-Byteport HTTP REST API documentation
+Byteport HTTP REST API documentation.
 
 == Disclaimer
 The Byteport HTTP APIv2 is under development with many additional functions.
@@ -49,7 +49,7 @@ guarantee the data is immediately parsed and stored.
 |===
 
 | URL
-| /api/v1/store/[namespace]/[device uid]/
+| /api/v1/timeseries/[namespace]/[device uid]/
 
 | Method
 | POST
@@ -73,10 +73,10 @@ _ts::
 ==== Example 1
 Storing a heartbeat using curl, no data is supplied, that is supported:
 
- $ curl --data "_key=1D3c2" "http://api.byteport.se/api/v1/store/mySpace/10/"
+ $ curl --data "_key=1D3c2" "http://api.byteport.se/api/v1/timeseries/mySpace/10/"
 
 ==== Example 2:
-When supplying data, you may also supply a timestamp in seconds since UNIX epoch. All other parameters will be 
+When supplying data, you may also supply a timestamp in seconds since UNIX epoch. All other parameters will be
 interpreted as application data, values can be any common number format or a string:
 
  $ curl --data "_key=1D3c2&_ts=1410613385.123&temp=20&last_word=mom" "http://api.byteport.se/api/v1/timeseries/mySpace/10/"
@@ -159,15 +159,42 @@ will invalidate your current sessionid, and you will need to obtain a new one by
 
 |===
 
-== Data access methods
-
-=== List namespaces
+== Echo
+This method will echo back the supplied GET parameters as JSON data and does not require a logged in session.
 
 [cols="h,5a"]
 |===
 
 | URL
-| /api/v1/namespaces/
+| /api/v1/echo/
+
+| Method
+| GET
+
+| Response code
+| 200
+
+| Content type
+| application/json
+
+| Response Body
+|
+....
+{
+    test: "hello world"
+}
+
+|===
+
+== Data access methods
+
+=== Namespace
+
+[cols="h,5a"]
+|===
+
+| URL
+| /api/v1/namespace/
 
 | Method
 | GET
@@ -176,7 +203,9 @@ will invalidate your current sessionid, and you will need to obtain a new one by
 | csrftoken, sessionid
 
 | Parameter(s)
-| N/A
+|
+key::
+ Show information for a single namespace by adding this parameter, key is the name of the namespace.
 
 | Content type
 | application/json
@@ -199,13 +228,14 @@ will invalidate your current sessionid, and you will need to obtain a new one by
 ....
 |===
 
-=== Query devices
+=== Free text search for devices
+Search for device in all namespace the logged in user has access to
 
 [cols="h,5a"]
 |===
 
 | URL
-| /api/v1/device_query/
+| /api/v1/search_devices/
 
 | Method
 | GET
@@ -216,7 +246,8 @@ will invalidate your current sessionid, and you will need to obtain a new one by
 | Parameter(s)
 |
 term::
- a string matching any device *guid*. A device guid is the namespace.uid combination.
+ a string matching any device *guid*. A device guid is the namespace.uid combination. Append a * to perform
+ a wild card search.
 full::
  *true* or *false*, to return the full object, or just the GUID
 limit::
@@ -248,14 +279,14 @@ limit::
 ....
 |===
 
-=== Get device
-The response of this call is somewhat cluttered. This is beeing fixed for APIv2.
+=== Device
+Query for devices in a namespace.
 
 [cols="h,5a"]
 |===
 
 | URL
-| /api/v1/device/[namespace]/[uid]/
+| /api/v1/namespace/[namespace]/device/
 
 | Method
 | GET
@@ -264,7 +295,14 @@ The response of this call is somewhat cluttered. This is beeing fixed for APIv2.
 | csrftoken, sessionid
 
 | Parameter(s)
-| N/A
+| key::
+ a string matching any device *guid*. A device guid is the namespace.uid combination. Append a * to perform
+ a wild card search.
+ uid::
+  Same as key
+ depth::
+  Default is 0 and will show the list of UIDs. Increasing to 1, 2 or 3 will show a more detailed object with more related
+  objects, such as data, device type and child devices etc.
 
 | Content type
 | application/json
@@ -323,13 +361,14 @@ The response of this call is somewhat cluttered. This is beeing fixed for APIv2.
 ....
 |===
 
-=== List or get all devices in namespace
+=== Device type
+Query for the device types available in this namespace.
 
 [cols="h,5a"]
 |===
 
 | URL
-| /api/v1/devices/[namespace]/
+| /api/v1/namespace/[namespace]/device_type/
 
 | Method
 | GET
@@ -338,9 +377,12 @@ The response of this call is somewhat cluttered. This is beeing fixed for APIv2.
 | csrftoken, sessionid
 
 | Parameter(s)
-|
-full::
- *true* or *false*, to return the full objects, or just the GUIDs
+| key::
+ Filter on a specific device type *id*.
+
+ depth::
+  Default is 1, decrease to 0 to show IDs only in result, or increase to 2 to show the field definitions for this device
+  type.
 
 | Content type
 | application/json
@@ -348,25 +390,145 @@ full::
 | Response Body (full=False)
 |
 ....
-{
-    meta:
+[
     {
-        term: "test"
+        timeout_limit: "180",
+        description: "",
+        accepts_children: "True",
+        command_channel: "all",
+        photo: "",
+        namespace: "test",
+        command_support: "True",
+        internet_connection: "ethernet",
+        id: "1",
+        name: "Generic Test Gateway"
     },
-    data:
-    [
-        "test.100",
-        "test.101",
-        "test.102",
-        "test.103",
-        "test.104",
-        "test.105",
-        "test.106",
-        "test.107",
-        "test.108",
-        "test.109"
-    ]
-}
+    {
+        timeout_limit: "180",
+        description: "",
+        accepts_children: "False",
+        command_channel: "all",
+        photo: "",
+        namespace: "test",
+        command_support: "False",
+        internet_connection: "none",
+        id: "2",
+        name: "Temperature sensor"
+    }
+]
+....
+|===
+
+
+=== Device type, firmware
+Query for available firmware for the given device type
+
+[cols="h,5a"]
+|===
+
+| URL
+| /api/v1/namespace/[namespace]/device_type/[device type id]/firmware/
+
+| Method
+| GET
+
+| Cookie
+| csrftoken, sessionid
+
+| Parameter(s)
+| N/A
+
+| Content type
+| application/json
+
+| Response Body
+|
+....
+[
+    {
+        uploaded: "2016-01-12 13:21:20.273027+00:00",
+        comment: "xbf",
+        uploader: "Frank",
+        md5_digest: "664bdd584bb5b65544a7d44560f2c413",
+        image: "infra/firmware/test/1/1.1/d836f2d0ad7f4bd6/theFirmware1.bz2",
+        enabled: "True",
+        version: "1.1",
+        filesize: "6",
+        device_type: "Generic Test Gateway (test)",
+        id: "2"
+    },
+    {
+        uploaded: "2016-01-12 13:19:54.479065+00:00",
+        comment: "sdf",
+        uploader: "Ernest",
+        md5_digest: "2fd2df26bc7d6741c141a302ef2318f6",
+        image: "infra/firmware/test/1/1.0/95a5bc51d05583b7/fw2.zip",
+        enabled: "True",
+        version: "1.0",
+        filesize: "8748",
+        device_type: "Generic Test Gateway (test)",
+        id: "1"
+    }
+]
+....
+|===
+
+=== Device type, field definitions
+Query for the field definitions for the given device type.
+
+[cols="h,5a"]
+|===
+
+| URL
+| /api/v1/namespace/[namespace]/device_type/[device type id]/field_definition/
+
+| Method
+| GET
+
+| Cookie
+| csrftoken, sessionid
+
+| Parameter(s)
+| N/A
+
+| Content type
+| application/json
+
+| Response Body
+|
+....
+[
+    {
+        description: "",
+        data_type: "object",
+        list_separator: "",
+        object_type: "application/json",
+        automation: "None",
+        default_processor: "None",
+        role: "def",
+        device_type: "Temperature sensor",
+        unit_symbol: "",
+        encoding_type: "base64",
+        id: "5",
+        unit: "",
+        name: "b64_jsons"
+    },
+    {
+        description: "",
+        data_type: "object",
+        list_separator: "",
+        object_type: "image/png",
+        automation: "None",
+        default_processor: "None",
+        role: "def",
+        device_type: "Temperature sensor",
+        unit_symbol: "",
+        encoding_type: "base64",
+        id: "2",
+        unit: "",
+        name: "b64_pngs"
+    }
+]
 ....
 |===
 

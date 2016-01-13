@@ -22,7 +22,7 @@ else
     DEVICE_UID=`hostname| tr . _`
 fi
 
-BYTEPORT_BASE_URL="http://$BYTEPORT_API_HOST/services/store/$NAMESPACE/$DEVICE_UID/?_key=$API_KEY"
+BYTEPORT_BASE_URL="https://$BYTEPORT_API_HOST/api/v1/timeseries/$NAMESPACE/$DEVICE_UID/?_key=$API_KEY"
 
 if [ "$#" -lt 2 ]; then
     echo "Usage: $0 [namespace] [namespace api write key] <device_uid (optional)>"
