@@ -38,6 +38,24 @@ class TestHttpClients(unittest.TestCase):
         # Will raise exception upon errors
         client.store(data)
 
+    def test_should_receive_error_for_missing_deviceuid_using_GET_client(self):
+        try:
+            client = ByteportHttpClient(
+                byteport_api_hostname=self.byteport_api_hostname,
+                namespace_name=self.namespace,
+                api_key=self.key,
+                default_device_uid=''
+            )
+
+            data = {'string': 'hello string'}
+
+            # Will raise exception upon errors
+            client.store(data)
+        except ByteportClientDeviceNotFoundException:
+            return
+
+        raise Exception("Unit under test did not raise the correct exception!")
+
     def test_should_store_data_series_using_GET_client(self):
         client = ByteportHttpGetClient(
             byteport_api_hostname=self.byteport_api_hostname,
@@ -338,7 +356,7 @@ class TestHttpClients(unittest.TestCase):
         result = client.get_devices('test')
         self.assertTrue( len(result) > 0 )
 
-        result = client.get_devices('test', "FOOBAR")
+        result = client.get_devices('test', "636744")
         self.assertTrue( len(result) == 0, "Should not find any device with id 636744, found: %s" % len(result) )
 
         result = client.get_devices('test', "TestGW")
