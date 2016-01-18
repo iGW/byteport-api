@@ -7,7 +7,7 @@ The Byteport HTTP APIv2 is under development with many additional functions.
 The v1 API described in this document will be supported at least until *2016-12-31*.
 
 Changes to the API minor number will not break the API but is a hint to added functionality only
-and will change the URL prefix, ie v1.0 and v1.1 clients both uses /api/v1/.
+and will *not change* the URL prefix, ie v1.0 and v1.1 clients both uses the /api/v1/ prefix.
 
 == Introduction
 If you are not instructed otherwise, all calls should be made against the following
