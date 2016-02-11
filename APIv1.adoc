@@ -50,11 +50,11 @@ Example, logging the speed of a mining cart uses this valid name
 
 The names used in the Byteport GUID must all adhere to the following rules:
 
-- Can not start with dash (-) or underscore (_).
 - Must be between 2 characters and 32 characters long.
-- Can not contain other characters than: 0-9, a-z and A-Z dashes and underscores.
+- Can not contain other characters than: 0-9, a-z,A-Z, dash, underscore and colon.
+- Can not start with dash (-) or underscore (_).
 
-In addition, a namespace created by a user most be longer than 6 characters.
+In addition, a namespace created by a user must be longer than 6 characters.
 
 
 === Reserved fields
