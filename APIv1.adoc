@@ -9,6 +9,7 @@ The v1 API described in this document will be supported at least until *2016-12-
 Changes to the API minor number will not break the API but is a hint to added functionality only
 and will *not change* the URL prefix, ie v1.0 and v1.1 clients both uses the /api/v1/ prefix.
 
+
 == Introduction
 If you are not instructed otherwise, all calls should be made against the following
 host:
@@ -33,7 +34,63 @@ following prerequisites:
 . Have a valid username and password to the Byteport instance you are accessing
 . The user must have access to the namespace you are working against.
 . Knowledge and understanding of the concepts namespace, device uid and
-field name etc.
+field name etc. For a brief primer on this subject, read below.
+
+
+== Names
+At the heart of Byteport are the time series data that are continuously stored from
+your devices. All data are stored vs a unique key called a Byteport GUID. The key
+is defined like this:
+
+`*[Namespace name].[Device UID].[Field name]*`
+
+Example, logging the speed of a mining cart uses this valid name
+
+*megamine.cart-44.Speed1*
+
+The names used in the Byteport GUID must all adhere to the following rules:
+
+- Can not start with dash (-) or underscore (_).
+- Must be between 2 characters and 32 characters long.
+- Can not contain other characters than: 0-9, a-z and A-Z dashes and underscores.
+
+In addition, a namespace created by a user most be longer than 6 characters.
+
+
+=== Reserved fields
+Any field name starting with an underscore character (_) will not be stored as a data field.
+Such fields are reserved meta fields to the Byteport data receiver. There are only two field
+name in use for this purpose at the moment, but further functionality may be added:
+
+|===
+|Field name | Description
+
+|_key
+|The API key to the namespace.
+
+|_ts
+|A custom timestamp for all the data supplied in the call.
+|===
+
+
+The following fields are not meta fields, but pose a special function as they are interpreted as log messages and will
+be displayed in various panels for the purpose, operations summary reports etc.
+|===
+|Field name |Description
+
+|debug
+|Log messages of DEBUG level. Stored on device level only.
+
+|info
+|Log messages of INFO level. Stored on device level only.
+
+|warn
+|Log messages of WARN level. Stored on device namespace level.
+
+|error
+|Log messages of ERROR level. Stored on device namespace level.
+|===
+
 
 == Storing data using API-key method
 
@@ -83,6 +140,7 @@ When supplying data, you may also supply a timestamp in seconds since UNIX epoch
 interpreted as application data, values can be any common number format or a string:
 
  $ curl --data "_key=1D3c2&_ts=1410613385.123&temp=20&last_word=mom" "http://api.byteport.se/api/v1/timeseries/mySpace/10/"
+
 
 == Log in
 To access stored data from a client, the client will first need to log in to obtain the sessionid cookie. The flow
@@ -143,6 +201,7 @@ csrfmiddlewaretoken::
 The server will respond with a Set-Cooke called *sessionid* that must be
 included in any subsequent call where the logged in context is needed.
 
+
 == Log out
 Log out by doing any kind of request to the log out URL. Server will respond with 200 OK upon successful logout. This
 will invalidate your current sessionid, and you will need to obtain a new one by logging in again.
@@ -161,6 +220,7 @@ will invalidate your current sessionid, and you will need to obtain a new one by
 
 
 |===
+
 
 == Echo
 This method will echo back the supplied GET parameters as JSON data and does not require a logged in session.
