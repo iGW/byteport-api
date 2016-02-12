@@ -1,2 +1,3 @@
-pytz==2012c
+pytz==2015.7
 stompest==2.1.6
+paho-mqtt==1.1

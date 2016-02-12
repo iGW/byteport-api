@@ -2,6 +2,8 @@
 import unittest
 
 from http_clients import *
+from stomp_client import *
+from mqtt_client import *
 
 '''
 
@@ -14,7 +16,7 @@ class TestHttpClients(unittest.TestCase):
     ACCEPTANCE = ('acc.byteport.se', 'd74f48f8375a32ca632fa49a')
     LOCALHOST = ('localhost:8000', 'TEST')
 
-    TEST_ENVIRONMENT = LOCALHOST
+    TEST_ENVIRONMENT = PRODUCTION
 
     byteport_api_hostname = TEST_ENVIRONMENT[0]
     key = TEST_ENVIRONMENT[1]
@@ -22,8 +24,11 @@ class TestHttpClients(unittest.TestCase):
     namespace = 'test'
     device_uid = 'byteport-api-tests'
 
-    test_user = 'admin'
-    test_password = 'admin'
+    #test_user = 'admin'
+    #test_password = 'admin'
+
+    test_user = 'testperson'
+    test_password = 'test'
 
     def test_should_store_string_to_single_field_name_using_GET_client(self):
         client = ByteportHttpClient(
@@ -444,12 +449,24 @@ class PollingTests(unittest.TestCase):
 
 class TestStompClient(unittest.TestCase):
 
-    TEST_BROKERS = ['canopus']
+    TEST_BROKERS = ['acc.broker.byteport.se']
 
     test_device_uid = '6000'
 
     def test_should_connect_and_send_one_message_using_stomp_client(self):
 
-        client = ByteportStompClient('test', 'publicTestUser', 'publicTestUser', broker_hosts=self.TEST_BROKERS)
+        client = ByteportStompClient(
+            'test', 'publicTestUser', 'publicTestUser', broker_hosts=self.TEST_BROKERS)
 
         client.store({'stomp_data': 'hello STOMP world!'}, self.test_device_uid)
+
+
+class TestMQTTClient(unittest.TestCase):
+
+    TEST_BROKERS = ['acc.broker.byteport.se']
+
+    test_device_uid = '6000'
+
+    def test_should_connect_and_send_one_message_using_mqtt_client(self):
+
+        client = ByteportMQTTClient('test', self.test_device_uid, 'publicTestUser', 'publicTestUser', broker_hosts=self.TEST_BROKERS)
