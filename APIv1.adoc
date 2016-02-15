@@ -755,3 +755,53 @@ decompress::
 | gzip, bzip2
 
 |===
+
+= Byteport asynchronous storage API v0.7
+Byteport also supports an asynchronous high performance method of storing data. This is facilitated through an enterprise level
+message broker and the protocols we support is:
+
+* MQTT (port 1883)
+* MQTT / SSL (port 8883)
+* STOMP (port 61613)
+* STOMP / SSL (port 61614)
+
+The message broker is as of v0.7 (2016, Feb.) not open for public access. To access the broker you need a valid login
+and the hostname of the broker to use. To obtain one you can contact *support@byteport.se*.
+
+== Storing data
+
+=== Comma separated data
+The messages posted should to the broker should be valid JSON and look like the example below. Note that even if
+a single message is sent, it should still be wrapped in a JSON list item and this is highly suitable for bulk
+loading data into Byteport.
+
+....
+[
+  {
+    "namespace": "theNamespace",
+    "uid": "deviceUID",
+    "timestamp": "1337666777.123",
+    "data": "temp=10;last_word=mom;"
+  },
+  {
+    "namespace": "theNamespace",
+    "uid": "deviceUID",
+    "timestamp": "1337666787.123",
+    "data": "temp=10;last_word=\"i love you\";"
+  }
+]
+....
+
+The data-field could contain an arbitrary amount of data values.
+
+== Receiving data
+The same broker can also be used to obtain messages from the Byteport IoT platform, typically for controlling devices
+in real-time or altering device parameters etc.
+
+All Byteport devices can listen on its designated queue, such as:
+
+....
+/queue/device_messages_NAMESPACE.DEVICEUID
+....
+
+The data sent to devices can *take on any form* as long as it is a valid ASCII string.
