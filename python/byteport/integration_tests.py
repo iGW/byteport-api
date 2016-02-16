@@ -12,7 +12,7 @@ NOTE: All tests here need a Byteport instance to communicate with
 '''
 class TestHttpClients(unittest.TestCase):
 
-    PRODUCTION = ('api.byteport.se', 'd8a26587463268f88fea6aec', 'N/A', 'N/A')
+    PRODUCTION = ('api.byteport.se', '(- LOOK IT UP -)', 'N/A', 'N/A')
     ACCEPTANCE = ('acc.byteport.se', 'd74f48f8375a32ca632fa49a', 'N/A', 'N/A')
     LOCALHOST = ('localhost:8000', 'TEST', 'admin', 'admin')
 
