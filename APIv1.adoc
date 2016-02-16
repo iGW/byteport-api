@@ -309,8 +309,8 @@ Search for device in all namespace the logged in user has access to
 | Parameter(s)
 |
 term::
- a string matching any device *guid*. A device guid is the namespace.uid combination. Append a * to perform
- a wild card search.
+ a string matching any device *guid*. A device guid is the namespace.uid combination. Append a . to perform
+ an exact search vs guid (ie. the Namepspace.Device UID combo).
 full::
  *true* or *false*, to return the full object, or just the GUID
 limit::
