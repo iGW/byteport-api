@@ -138,10 +138,16 @@ class ByteportHttpClient(AbstractByteportClient):
                 return cookie.value
         return None
 
+    def logout(self):
+        url = '%s://%s%s' % (self.DEFAULT_BYTEPORT_API_PROTOCOL, self.byteport_api_hostname, self.LOGOUT_PATH)
+        return self.make_request(url).read()
+
     def list_namespaces(self):
         url = '%s://%s%s' % (self.DEFAULT_BYTEPORT_API_PROTOCOL, self.byteport_api_hostname, self.LIST_NAMESPACES)
 
-        return json.loads(self.make_request(url).read())
+        rq = self.make_request(url)
+
+        return json.loads(rq.read())
 
     def query_devices(self, term, full=False, limit=20):
         request_parameters = {'term': term, 'full': u'%s' % full, 'limit': limit}

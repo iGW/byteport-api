@@ -15,7 +15,7 @@ class ByteportMQTTClient(AbstractByteportClient):
     DEFAULT_BROKER_HOSTS = ['broker.igw.se', 'broker1.igw.se', 'broker2.igw.se', 'broker3.igw.se']
     QUEUE_NAME = '/queue/simple_string_dev_message'
 
-    def __init__(self, namespace, device_uid, username, password, broker_hosts=DEFAULT_BROKER_HOSTS):
+    def __init__(self, namespace, device_uid, username, password, broker_hosts=DEFAULT_BROKER_HOSTS, loop_forever=False):
 
         self.namespace = str(namespace)
 
@@ -36,7 +36,10 @@ class ByteportMQTTClient(AbstractByteportClient):
             # handles reconnecting.
             # Other loop*() functions are available that give a threaded interface and a
             # manual interface.
-            self.client.loop_forever()
+            if loop_forever:
+                self.client.loop_forever()
+
+            self.client.publish()
 
     # The callback for when the client receives a CONNACK response from the server.
     def on_connect(self, client, userdata, flags, rc):

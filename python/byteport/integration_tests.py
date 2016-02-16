@@ -12,23 +12,19 @@ NOTE: All tests here need a Byteport instance to communicate with
 '''
 class TestHttpClients(unittest.TestCase):
 
-    PRODUCTION = ('api.byteport.se', 'd8a26587463268f88fea6aec')
-    ACCEPTANCE = ('acc.byteport.se', 'd74f48f8375a32ca632fa49a')
-    LOCALHOST = ('localhost:8000', 'TEST')
+    PRODUCTION = ('api.byteport.se', 'd8a26587463268f88fea6aec', 'N/A', 'N/A')
+    ACCEPTANCE = ('acc.byteport.se', 'd74f48f8375a32ca632fa49a', 'N/A', 'N/A')
+    LOCALHOST = ('localhost:8000', 'TEST', 'admin', 'admin')
 
-    TEST_ENVIRONMENT = PRODUCTION
+    TEST_ENVIRONMENT = LOCALHOST
 
     byteport_api_hostname = TEST_ENVIRONMENT[0]
     key = TEST_ENVIRONMENT[1]
+    test_user = TEST_ENVIRONMENT[2]
+    test_password = TEST_ENVIRONMENT[3]
 
     namespace = 'test'
     device_uid = 'byteport-api-tests'
-
-    #test_user = 'admin'
-    #test_password = 'admin'
-
-    test_user = 'testperson'
-    test_password = 'test'
 
     def test_should_store_string_to_single_field_name_using_GET_client(self):
         client = ByteportHttpClient(
@@ -310,6 +306,22 @@ class TestHttpClients(unittest.TestCase):
 
         client.login(self.test_user, self.test_password)
 
+    def test_should_login_and_logout_and_not_have_access_after(self):
+        client = ByteportHttpClient(
+            byteport_api_hostname=self.byteport_api_hostname
+        )
+
+        client.login(self.test_user, self.test_password)
+
+        client.logout()
+
+        try:
+            client.list_namespaces()
+        except Exception as e:
+            return
+
+        raise Exception("list_namespaces() did not raise exception after logout!")
+
     def test_should_not_login_with_invalid_credentials(self):
         client = ByteportHttpClient(
             byteport_api_hostname=self.byteport_api_hostname,
@@ -467,6 +479,6 @@ class TestMQTTClient(unittest.TestCase):
 
     test_device_uid = '6000'
 
-    def test_should_connect_and_send_one_message_using_mqtt_client(self):
+    def test_should_connect_using_mqtt_client(self):
 
         client = ByteportMQTTClient('test', self.test_device_uid, 'publicTestUser', 'publicTestUser', broker_hosts=self.TEST_BROKERS)
