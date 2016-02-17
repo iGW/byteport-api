@@ -475,9 +475,9 @@ to (GET only)::
  Message index. Default is 0, hence one message will be returned by default.
 message (POST only)::
  Any ASCII text.
-format_json (POST only)::
- on or off.
- Wrap the message in the JSON structure like the example below. Off is default.
+format (POST only)::
+ Valid formats: *json* (other formats may be added)
+ Wrap the message in the JSON structure like the example below. json is default.
 ....
  [
    { "data": "text message to device",
