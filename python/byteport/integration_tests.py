@@ -436,6 +436,21 @@ class TestHttpClients(unittest.TestCase):
         result = client.load_timeseries_data('test', '6000', 'temp', timedelta_minutes=180)
         self.assertEqual(result['meta']['path'], u'test.6000.temp')
 
+    def test_should_login_and_send_message(self):
+        client = ByteportHttpClient(
+            byteport_api_hostname=self.byteport_api_hostname
+        )
+
+        client.login(self.test_user, self.test_password)
+
+        message_to_device = 'hello from integration tests'
+        response = client.send_message('test', '6000', message_to_device)
+
+        # note the message SENT is also JSON, so there is another JSON structure embeedded in the response!
+        message = json.loads(response['message'])
+
+        self.assertEqual(message[0]['data'], message_to_device)
+
 class PollingTests(unittest.TestCase):
 
     #hostname = 'localhost:8000'

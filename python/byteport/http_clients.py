@@ -48,6 +48,8 @@ class ByteportHttpClient(AbstractByteportClient):
     LOAD_TIMESERIES_DATA        = '/api/v1/timeseries/%s/%s/%s/'
     DEFAULT_BYTEPORT_STORE_PATH = '/api/v1/timeseries/'
 
+    SEND_MESSAGE = '/api/v1/message/%s/%s/'
+
     #
     DEFAULT_BYTEPORT_API_STORE_URL = '%s://%s%s' % (DEFAULT_BYTEPORT_API_PROTOCOL,
                                                     DEFAULT_BYTEPORT_API_HOSTNAME,
@@ -158,6 +160,24 @@ class ByteportHttpClient(AbstractByteportClient):
                                 encoded_data)
 
         return json.loads(self.make_request(url).read())
+
+    def search_devices(self, term, full, limit):
+        return self.query_devices(term, full, limit)
+
+    def send_message(self, namespace, device_uid, message, format='json'):
+        base_url = '%s://%s%s' % (self.DEFAULT_BYTEPORT_API_PROTOCOL,
+                                self.byteport_api_hostname,
+                                self.SEND_MESSAGE)
+
+        url = base_url % (namespace, device_uid)
+
+        csrftoken = self.__get_value_of_cookie('csrftoken')
+        post_data = {'message': message, 'format': format, 'csrfmiddlewaretoken': csrftoken}
+
+        # Encode data to UTF-8 before storing
+        utf8_encoded_data = self.convert_data_to_utf8(post_data)
+
+        return json.loads(self.make_request(url, utf8_encoded_data).read())
 
 #TODO: Deprecated. Remove at some point.
     def get_device(self, namespace, uid):
