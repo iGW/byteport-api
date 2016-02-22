@@ -2,7 +2,9 @@
 
 Byteport HTTP REST API documentation.
 
-:toc:
+:toc: macro
+
+toc::[]
 
 == Notes on API version
 The Byteport HTTP APIv2 is under development with many additional functions.
@@ -480,7 +482,7 @@ format (POST only)::
  Wrap the message in the JSON structure like the example below. json is default.
 ....
  [
-   { "data": "text message to device",
+   { "data": "[ASCII Payload, could be another JSON structure, XML or just a string]",
      "namespace": "test",
      "uid": "100",
      "timestamp": "1455632016"
