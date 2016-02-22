@@ -994,8 +994,8 @@ build_calendar::
 ....
 |===
 == Byteport asynchronous storage API v0.7
-Byteport also supports an asynchronous high performance method of storing data. This is facilitated through an enterprise level
-message broker and the protocols we support is:
+Byteport also supports asynchronous communications, both for storing data and for sending messages to connected
+devices, the protocols we support are:
 
 * MQTT (port 1883)
 * MQTT / SSL (port 8883)
