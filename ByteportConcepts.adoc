@@ -1,0 +1,94 @@
+= Byteport Concepts
+Byteport basic concepts documentation.
+v0.1, 2016-02-23
+:library: Asciidoctor
+:idprefix:
+:numbered:
+:imagesdir: images
+:toc: manual
+:css-signature: demo
+:toc-placement: preamble
+//:max-width: 800px
+//:doctype: book
+//:sectids!:
+
+// Do NOT remove this line!
+*NOTE: THIS DOCUMENTATION IS A DRAFT*
+
+This document covers the basic concepts of Byteport and serves as a basic introduction with screenshots and
+a guide on how to successfully manage systems (IoT, embedded equipment etc.) using Byteport.
+
+This documentation does *not* contain programming or API usage examples, for such things you should instead look
+to the link:APIv1.adoc[Byteport API Documentation].
+
+Any questions regarding this document can be sent to contact@byteport.se.
+
+== Introduction
+
+== Getting started
+
+
+== Namespace
+
+=== Security
+
+=== Device types
+
+=== Field definitions
+
+== Devices
+
+=== Properties
+
+=== Time series data
+
+=== Field configurations
+
+=== Messaging
+
+
+== Byteport Manager
+The link:https://www.byteport.se/manager/[Byteport Manager] is the GUI in which you define your namespaces, devices
+and data series. Your devices will start feeding data to Byteport and you can then build smart work flows for your data
+and build useful applications on this foundation you have created.
+
+image:device1.gif["A piece of the Byteport device manager.",width=600]
+
+_A piece of the Byteport device manager_
+
+
+== Operations
+
+=== Alarms and conditions
+
+=== Logs
+
+=== Data analysis
+
+=== Reports
+
+== IoT Know-how
+
+
+
+== API
+
+
+
+== Applications
+
+=== Byteport Integrated
+
+=== External Web application
+
+=== Native Mobile Application
+
+==== Android
+
+==== iOS
+
+==== Windows
+
+
+//[[img-sunset]]
+//image::sunset.jpg[caption="Figure 1: ", title="A mountain sunset", alt="Sunset", width="300", height="200", link="http://www.flickr.com/photos/javh/5448336655"]

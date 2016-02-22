@@ -16,7 +16,7 @@ v1.2, 2016-02-15
 This document covers Byteport API usage and integration techniques.
 
 If you are not accustomed to the basic Byteport concepts you should first have a look at the
-link:Concepts.adoc[Byteport concepts documentation] document.
+link:ByteportConcepts.adoc[Byteport concepts documentation] document.
 
 Any questions regarding this document can be sent to contact@byteport.se.
 
