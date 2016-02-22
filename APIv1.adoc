@@ -2,7 +2,7 @@
 v1.2, 2016-02-15
 :library: Asciidoctor
 :idprefix:
-//:numbered:
+:numbered:
 :imagesdir: images
 :toc: manual
 :toc-title: pass:[<h2>Table of Contents</h2>]
