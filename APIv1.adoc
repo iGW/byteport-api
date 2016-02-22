@@ -1,4 +1,5 @@
-= Byteport API v1.2
+Byteport API v1.2
+===================
 Byteport API documentation.
 v1.2, 2016-02-15
 :library: Asciidoctor
@@ -11,7 +12,6 @@ v1.2, 2016-02-15
 //:max-width: 800px
 //:doctype: book
 //:sectids!:
-
 
 == Notes on API version
 The Byteport HTTP APIv2 is under development with many additional functions.
