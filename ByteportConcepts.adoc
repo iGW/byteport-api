@@ -6,6 +6,7 @@ v0.1, 2016-02-23
 :numbered:
 :imagesdir: images
 :toc: manual
+:toc-title: pass:[<h2>Table of Contents</h2>]
 :css-signature: demo
 :toc-placement: preamble
 //:max-width: 800px
