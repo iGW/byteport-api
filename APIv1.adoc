@@ -1,10 +1,17 @@
-= Byteport HTTP API v1.2
+= Byteport API v1.2
 
-Byteport HTTP REST API documentation.
+Byteport API documentation.
 
+:experimental:
 :toc:
 :toc-placement: preamble
 :toc-title: pass:[<b>Table of Contents</b>]
+:outfilesuffix-old: {outfilesuffix}
+ifdef::env-github[:outfilesuffix: .adoc]
+ifndef::env-github[]
+:idprefix:
+:idseparator: -
+endif::[]
 
 == Notes on API version
 The Byteport HTTP APIv2 is under development with many additional functions.
