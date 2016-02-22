@@ -23,23 +23,27 @@ class ByteportMQTTClient(AbstractByteportClient):
 
         for broker_host in broker_hosts:
 
-            self.client = mqtt.Client(client_id=guid, clean_session=False)
-            self.client.username_pw_set(username, password)
-            self.client.on_connect = self.on_connect
-            self.client.on_message = self.on_message
+            try:
+                self.client = mqtt.Client(client_id=guid, clean_session=False)
+                self.client.username_pw_set(username, password)
+                self.client.on_connect = self.on_connect
+                self.client.on_message = self.on_message
 
-            print "Connecting to %s" % broker_host
+                print "Connecting to %s" % broker_host
 
-            self.client.connect(broker_host, 1883, 60)
+                self.client.connect(broker_host, 1883, 60)
 
-            # Blocking call that processes network traffic, dispatches callbacks and
-            # handles reconnecting.
-            # Other loop*() functions are available that give a threaded interface and a
-            # manual interface.
-            if loop_forever:
-                self.client.loop_forever()
+                # Blocking call that processes network traffic, dispatches callbacks and
+                # handles reconnecting.
+                # Other loop*() functions are available that give a threaded interface and a
+                # manual interface.
+                if loop_forever:
+                    self.client.loop_forever()
 
-            self.client.publish()
+                self.client.subscribe(self.QUEUE_NAME)
+
+            except Exception:
+                continue
 
     # The callback for when the client receives a CONNACK response from the server.
     def on_connect(self, client, userdata, flags, rc):
@@ -50,7 +54,7 @@ class ByteportMQTTClient(AbstractByteportClient):
 
         # Subscribing in on_connect() means that if we lose the connection and
         # reconnect then subscriptions will be renewed.
-        # self.client.subscribe("/queue/mqtt_test")
+        self.client.subscribe("/queue/mqtt_test")
 
     # The callback for when a PUBLISH message is received from the server.
     def on_message(self, client, userdata, msg):

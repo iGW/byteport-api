@@ -12,7 +12,18 @@ v1.2, 2016-02-15
 //:doctype: book
 //:sectids!:
 
-Any questions regarding the API can be sent to contact@byteport.se.
+// Do NOT remove this line!
+This document covers Byteport API usage and integration techniques.
+
+If you are not accustomed to the basic Byteport concepts you should first have a look at the
+link:Concepts.adoc[Byteport concepts documentation] document.
+
+Any questions regarding this document can be sent to contact@byteport.se.
+
+// AsciiDoc resources:
+//
+// Cheat sheet: https://powerman.name/doc/asciidoc
+// Examples:    https://github.com/opendevise/asciidoc-samples/blob/master/demo.adoc
 
 == Notes on API version
 The Byteport HTTP APIv2 is under development with many additional functions.
@@ -275,6 +286,7 @@ This method will echo back the supplied GET parameters as JSON data and does not
 == Data access methods
 
 === Namespace
+List all namespaces the user has access to.
 
 [cols="h,5a"]
 |===
@@ -311,6 +323,44 @@ key::
         description: "A very pleasant space"
     }
 ]
+....
+|===
+
+=== Namespace activity
+List all devices that communicated with Byteport the last 24 hours.
+
+[cols="h,5a"]
+|===
+
+| URL
+| /api/v1/namespace/[namespace name]/activity/
+
+| Method
+| GET
+
+| Cookie
+| csrftoken, sessionid
+
+| Parameter(s)
+|
+None.
+
+| Content type
+| application/json
+
+| Response Body
+|
+....
+{
+    registered_devices: [ ],
+    unregistered_devices: [
+        [
+            "spaceland",
+            "antnas-gw-0",
+            "2016-02-22T12:55:33.165"
+        ]
+    ]
+}
 ....
 |===
 
@@ -835,7 +885,7 @@ decompress::
 
 |===
 
-= Byteport asynchronous storage API v0.7
+== Byteport asynchronous storage API v0.7
 Byteport also supports an asynchronous high performance method of storing data. This is facilitated through an enterprise level
 message broker and the protocols we support is:
 
@@ -847,9 +897,9 @@ message broker and the protocols we support is:
 The message broker is as of v0.7 (2016, Feb.) not open for public access. To access the broker you need a valid login
 and the hostname of the broker to use. To obtain one you can contact *support@byteport.se*.
 
-== Storing data
+=== Storing data
 
-=== Comma separated data
+==== Comma separated data
 The messages posted should to the broker should be valid JSON and look like the example below. Note that even if
 a single message is sent, it should still be wrapped in a JSON list item and this is highly suitable for bulk
 loading data into Byteport.
@@ -873,7 +923,7 @@ loading data into Byteport.
 
 The data-field could contain an arbitrary amount of data values.
 
-== Receiving data
+=== Receiving data
 The same broker can also be used to obtain messages from the Byteport IoT platform, typically for controlling devices
 in real-time or altering device parameters etc.
 
