@@ -2,9 +2,9 @@
 
 Byteport HTTP REST API documentation.
 
-:toc: macro
-
-toc::[]
+:toc:
+:toc-placement: preamble
+:toc-title: pass:[<b>Table of Contents</b>]
 
 == Notes on API version
 The Byteport HTTP APIv2 is under development with many additional functions.
