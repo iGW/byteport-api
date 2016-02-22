@@ -1,16 +1,17 @@
 = Byteport API v1.2
 Byteport API documentation.
 v1.2, 2016-02-15
-:experimental:
-:toc:
-:toc-placement: preamble
-:toc-title: pass:[<b>Table of Contents</b>]
-:outfilesuffix-old: {outfilesuffix}
-ifdef::env-github[:outfilesuffix: .adoc]
-ifndef::env-github[]
+:library: Asciidoctor
 :idprefix:
-:idseparator: -
-endif::[]
+:numbered:
+:imagesdir: images
+:toc: manual
+:css-signature: demo
+:toc-placement: preamble
+//:max-width: 800px
+//:doctype: book
+//:sectids!:
+
 
 == Notes on API version
 The Byteport HTTP APIv2 is under development with many additional functions.
