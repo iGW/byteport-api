@@ -33,18 +33,18 @@ Changes to the API minor number will not break the API but is a hint to added fu
 and will *not change* the URL prefix, ie v1.0 and v1.1 clients both uses the /api/v1/ prefix.
 
 == Changelog
-=== v1.3
+=== v1.3 [2016/02]
 Added method to view last 24h namespace activity. Added method to obtain time series statistics.
 
-=== v1.2
+=== v1.2 [2016/01]
 Added method to POST messages to devices through API method via the message broker network.
 A GET to the same URL will load message history.
 
-=== v1.1
+=== v1.1 [2015/12]
 Added mode to load namespace and device data using the new *depth* parameter. By adding depth
 a device can also append its child devices in the same request.
 
-=== v1.0
+=== v1.0 [2015/11]
 First version, all essentials for loading Namespace, Device, Device Types and Time series data.
 
 == Introduction
