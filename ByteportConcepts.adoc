@@ -30,8 +30,8 @@ Any questions regarding this document can be sent to contact@byteport.se.
 // Examples:    https://github.com/opendevise/asciidoc-samples/blob/master/demo.adoc
 
 == Introduction
-Byteport is a platform software that aims to solve a number of key issues related to the expanding IoT phenomenom,
-mainly but not limited to:
+Byteport is a middleware platform service that aims to solve a number of key issues related to the expanding IoT
+phenomenon, mainly but not limited to:
 
 * Device organisation and management
 * Data storage
@@ -42,7 +42,7 @@ mainly but not limited to:
 
 Byteport has an intuitive web-based GUI where a developer or operator can define and manage device behaviour.
 
-image:register_device1.gif["Device registration in Byteport",width=600]
+image:byteport_overview.gif["Byteport overview", width=600, align="center"]
 
 === API only or Full Service?
 Any person could get started with Byteport by reading this document and the link:APIv1.adoc[Byteport API specification].
@@ -73,13 +73,12 @@ You need a link:#namespace[namespace]
 before you can register any devices, as devices belong to a single namespace. You create one
 (or a few) namespace per project. Do that link:http://www.byteport.se/manager/namespaces/[now].
 
-image:create_namespace1.gif["Create a Namespace",width=800]
+image:create_namespace1.gif["Create a Namespace", width=600, align="center"]
 
-.*4) List your namespaces*
-You should now link:http://www.byteport.se/manager/namespaces/[list your namespaces], your newly registered namespace should be in
+Now try link:http://www.byteport.se/manager/namespaces/[list your namespaces], your newly registered namespace should be in
 the list. Should a colleague have added you to one of his/hers namespace, it will also appear in this list.
 
-.*5) Register a Device*
+.*4) Register a Device*
 While you can start pumping data to Byteport even without registering a single device, you should definitely register
 your devices and unlock the potential of Byteport. Read up on how to name a device properly in a link:#names[section below].
 
@@ -89,13 +88,13 @@ Note that in the example above, a custom link:#device_types[device type] is used
 the registration form, as seen. Device types is used to describe your devices and their data series. You can read more
 on that subject link:#device_types[below].
 
-.*6a) Connect a device to Byteport*
+.*5a) Connect a device to Byteport*
 If you have a physical device you want to monitor - now is a good time to do that. You could start with checking our
 link:https://github.com/iGW/byteport-api[API client examples on GitHub] and of course have a look at the
 link:APIv1.adoc[Byteport API specification]. You know what, your laptop or workstation will do just fine as a Device
 you can monitor even if you do not have an embedded device to fiddle with.
 
-.*6b) Fake a connected Device*
+.*5b) Fake a connected Device*
 If you do *not* have any physical devices to connect, you could simply make a call to the HTTPS API. That is as easy
 as copying the link below to a new browser tab and replace the placeholders with real values. You will have to enable
 API Write method *Allow write by HTTP GET* and at the same time get the API Write key and replace it in the place holder
@@ -112,13 +111,13 @@ image:device2.gif["A Device has stored the word hello",width=800]
 NOTE: Byteport will warn that some data field was not defined properly. You open up the device type page using the link
 from the device (under *Type* to the left) view, this is done in step 8).
 
-.*7) Add a field definition*
+.*6) Add a field definition*
 Add a field definition to your device type to describe your data properly, you can add a description a unit and a unit
-symbol for use in graphs, data analysis exports etc.
+symbol for use in graphs, data analysis exports etc. You only need to do this once per device type.
 
 image:add_field_definition.gif["Add a field definition to a device type",width=800]
 
-.*8) Invite your colleagues*
+.*7) Invite your colleagues*
 A namespace can be shared with other users. You can do that by selecting your newly created namespace and then clicking on
 the *security* tab, add a user by typing in the Byteport username or email of the user you wish to add. A person can
 be invited to use the namespace either as a User or as an Owner. The only difference is that owners can add new persons
@@ -168,6 +167,10 @@ the data from the new series, and you must keep track of the dates and fetch dat
 === Device types
 
 === Field definitions
+==== Numbers
+==== Strings
+==== Objects
+
 
 == Devices
 
