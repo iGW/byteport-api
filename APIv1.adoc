@@ -730,7 +730,7 @@ Query for the field definitions for the given device type.
 === Get timeseries data
 
 [cols="h,5a"]
-|===
+|==============================================
 
 | URL
 | /api/v1/timeseries/[namespace]/[uid]/[field name]/
@@ -753,6 +753,36 @@ timedelta_hours::
  Hours back in time (will default ‘from’ to now in time).
 timedelta_days::
  Days back in time (will default ‘from’ to now in time).
+scale::
+ Scale data by this factor. Default is 1 (no scaling)
+operation::
+ Performs simple mathematical operations on the data. Default is no operation. Possible operations
+ are:
+
+[width="75%", cols="1,4"]
+!==============================================
+!diff
+! Perform forward difference operation of the discrete time series data over N samples:
+
+y[t] = (x[t1] + x[t2]) / [t2 - t1].
+
+Where t = t1 + (t2 - t1) /2. (ie. half way between samples).The resulting data series will have the unit of
+[unit / second] and is the approximative derivative to the input data. Useful for getting the _rate of change_
+of the measured data. The forward difference series will be of length N - 1.
+
+!smooth_diff
+! Experimental: Perform forward difference operation of the discrete data and
+performs a moving average before and after the diff operation so obtain a smoothed variant for visual purposes only.
+
+The resulting series will contain less than N samples over the interval.
+
+!cum_sum
+! Perform the cumulative sum operation:
+
+y[tn] = x[t0] + x[t1] ... + x[tn]
+
+The resulting series will be of length N.
+!==============================================
 
 | Content type
 | application/json
@@ -811,7 +841,7 @@ timedelta_days::
   }
 }
 ....
-|===
+|==============================================
 
 === Get single data point
 Using the *r* as obtained using the above timeseries range call, the details for a single data point can be loaded.
