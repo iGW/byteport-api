@@ -762,24 +762,23 @@ operation::
 [width="75%", cols="1,4"]
 !==============================================
 !diff
-! Perform forward difference operation of the discrete time series data over N samples:
+! Perform the difference operation of the discrete time series data over N samples:
 
-y[t] = (x[t1] + x[t2]) / [t2 - t1].
+y[t] = (x[t+1] - x[t-1]) / [t2 - t1].
 
-Where t = t1 + (t2 - t1) /2. (ie. half way between samples).The resulting data series will have the unit of
-[unit / second] and is the approximative derivative to the input data. Useful for getting the _rate of change_
-of the measured data. The forward difference series will be of length N - 1.
+The resulting data series will have the unit of [unit / second] and is the approximative derivative of the input
+sample (x[t]). Useful for getting the _rate of change_ of the measured data. The output will be of length N - 2.
 
 !smooth_diff
 ! Experimental: Perform forward difference operation of the discrete data and
-performs a moving average before and after the diff operation so obtain a smoothed variant for visual purposes only.
+performs a moving average before and after the diff operation to obtain a smoothed variant for visual purposes only.
 
 The resulting series will contain less than N samples over the interval.
 
 !cum_sum
 ! Perform the cumulative sum operation:
 
-y[tn] = x[t0] + x[t1] ... + x[tn]
+y[n] = x[0] + x[1] ... + x[n]
 
 The resulting series will be of length N.
 !==============================================
