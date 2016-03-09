@@ -764,7 +764,7 @@ operation::
 !diff
 ! Perform the difference operation of the discrete time series data over N samples:
 
-y[t] = (x[t+1] - x[t-1]) / [t2 - t1].
+y[t] = (x[n+1] - x[n-1]) / [t(n+1) - t(n-1)].  (ie. approximately dy = dx / dt)
 
 The resulting data series will have the unit of [unit / second] and is the approximative derivative of the input
 sample (x[t]). Useful for getting the _rate of change_ of the measured data. The output will be of length N - 2.
