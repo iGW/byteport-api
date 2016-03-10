@@ -38,6 +38,9 @@ class ByteportClientInvalidFieldNameException(ByteportClientException):
 class ByteportClientInvalidDataTypeException(ByteportClientException):
     pass
 
+class ByteportServerException(ByteportClientException):
+    pass
+
 
 class AbstractByteportClient:
 

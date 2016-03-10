@@ -304,6 +304,9 @@ class ByteportHttpClient(AbstractByteportClient):
                           u'namespace %s.' % self.namespace_name
                 logging.info(message)
                 raise ByteportClientDeviceNotFoundException(message)
+            if http_error.code == 500:
+                message = u'500, Server error!'
+                raise ByteportServerException(message)
 
         except urllib2.URLError as e:
             logging.error(u'URLError accessing %s, Error was: %s' % (url, e))

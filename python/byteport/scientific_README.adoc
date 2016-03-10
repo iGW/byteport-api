@@ -1,0 +1,109 @@
+= Byteport Scientific
+v0.5, 2016-03-10
+:library: Asciidoctor
+:idprefix:
+:numbered:
+:imagesdir: images
+:toc: manual
+:toc-title: pass:[<h2>Table of Contents</h2>]
+:css-signature: demo
+:toc-placement: preamble
+//:max-width: 800px
+//:doctype: book
+//:sectids!:
+
+// Do NOT remove this line!
+This document covers scientific usage of Byteport in Python environments.
+
+Byteport can easily be used as a data source for scientific use cases. In this document we provide
+a simple guide for how to set up your environment and a few examples to get you started using the
+most common libraries and tool-kits.
+
+== Basic setup
+First, clone the Byteport API repository from github like this:
+
+....
+cd /tmp
+git clone https://github.com/iGW/byteport-api
+....
+This will not install the Byteport API yet. Depending on what environment you work with, this will be explained
+below:
+
+== Anaconda
+Our platform of choice is Anaconda since it contains most (all?) important scientific python packages in one
+simple installer. Get it here: https://www.continuum.io/downloads
+
+After installing anaconda, there will be a new Python environment in your system, similar to using a virtual
+environment you may be used to.
+
+To install the byteport, assuming you cloned the Byteport API code into /tmp/
+....
+$ cd /tmp/byteport-api/python
+$ ~/anaconda/bin/python ./setup.py install
+....
+
+You should now be able to import the byteport module into the Aanaconda tool you are working with, for example,
+using Spyder, it should look like this:
+
+image:spyder1.gif["Byteport client code imported in Spyder invironment under Anaconda",width=600]
+
+Copy the example code below to try it out your self, just fill in the *???????* before running.
+
+....
+from byteport.scientific import TimeseriesAnalyser
+import datetime
+
+now = datetime.datetime.now()
+
+USERNAME = '???????'
+PASSWORD = '???????'
+
+# Create the TimeseriesAnalyser object, this will connect to Byteport
+analyser = TimeseriesAnalyser(USERNAME, PASSWORD)
+
+# Define what data to load
+NAMESPACE = '???????'
+DEVICE_UID = '???????'
+FIELD_NAME = '???????'
+
+# Define the timespan
+from_time = now - datetime.timedelta(days=7)
+to_time = now
+
+# Load the data
+pandas_series = analyser.load_to_series(NAMESPACE, DEVICE_UID, FIELD_NAME, from_time, to_time)
+
+....
+
+To plot the loaded data using matplotlib, do this:
+....
+import matplotlib
+import matplotlib.pyplot as plt
+matplotlib.style.use('ggplot')
+pandas_series.plot()
+....
+image:ggplot1.gif["A simple plot using matplotlib",width=600]
+
+You can now also make a simple analysis of the data:
+
+....
+
+# Convert to DataFrame
+df = pandas_series.to_frame()
+
+# Spit the loaded data into daily and hourly chunks and describe them individually
+split_descriptions_daily = analyser.split_describe(df, 'DAILY')
+split_descriptions_hourly = analyser.split_describe(df, 'HOURLY')
+
+split_descriptions_hourly[0]
+Out[14]:
+((datetime.date(2016, 3, 3), 11),                0
+ count  53.000000
+ mean    0.112075
+ std     0.020034
+ min     0.070000
+ 25%     0.100000
+ 50%     0.110000
+ 75%     0.130000
+ max     0.140000)
+....
