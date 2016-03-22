@@ -1043,7 +1043,9 @@ _Note:_
 This service makes all calculation on the fly and does not
 depend on any pre-calculated data - hence it is not be performing optimal.
 The parameters can be possibly altered to the point where the algorithm terminates, in
-that case a code 504 (timeout) response will be returned.
+that case a code 504 (timeout) response will be returned. In case of malformed
+parameters of data, a 500 response may be returned while this function is in
+experimental mode.
 
 [cols="h,5a"]
 |===
