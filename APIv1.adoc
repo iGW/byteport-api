@@ -1022,6 +1022,139 @@ build_calendar::
     }
 ....
 |===
+
+
+=== Experimental: Time series anomaly detection - Distance to Typical algorithm.
+This service is *experimental* and is subject to change at any point without notice.
+
+Returns a list of elements, each carrying a date and a distance to a calculated
+typical segment. The distance figure is a number >= 0. Larger numbers are more
+different. What this distance means is left for interpretation.
+
+The time series under analysis is split into a number of segments. The algorithm
+will then for each segment return a number defining how different each segment is
+to a fictitious typical segment by some definition.
+
+Algorithm behaviour can be adjusted by a number of parameters as described below.
+
+The order of the returned data is either by distance to the typical or in date order.
+
+_Note:_
+This service makes all calculation on the fly and does not
+depend on any pre-calculated data - hence it is not be performing optimal.
+The parameters can be possibly altered to the point where the algorithm terminates, in
+that case a code 504 (timeout) response will be returned.
+
+[cols="h,5a"]
+|===
+
+| URL
+| /api/v1/timeseries/analysis/distance_to_typical/[namespace]/[uid]/[field name]/
+
+| Method
+| GET
+
+| Cookie
+| csrftoken, sessionid
+
+| Parameter(s)
+|
+from::
+ An ISO8601 datetime, %Y-%m-%dT%H:%M:%S. Example 2015-04-01T13:14:15
+to::
+ An ISO8601 datetime.
+timedelta_minutes::
+ Mintes back in time (will default ‘from’ to now in time).
+timedelta_hours::
+ Hours back in time (will default ‘from’ to now in time).
+timedelta_days::
+ Days back in time (will default ‘from’ to now in time). Default is *7*.
+grouping::
+ Any of *daily*, hourly, weekly or monthly. The returned date depends on the grouping
+ and has the format as the examples below:
+[cols="1,2,4"]
+!==============================================
+! daily
+! 2016-03-10
+! The date of the segment.
+
+!hourly
+! 2016-03-10 13
+! The date and hour of the segment.
+
+!weekly
+! 2016 21
+! The year and week of the segment.
+
+!monthly
+! 2016 07
+! The year and month of the segment.
+
+!==============================================
+
+order::
+ Result order. Either *date* or distance.
+diff_before_analysis::
+ Differentiate time series before analysis. Useful on accumulator type of data that is
+ non-stationary (ie. always increasing) in nature. True / *False*
+include_descriptions::
+ Include the data that was used to describe each segment. True / *False*
+exclude_descriptors::
+ A comma separated list of descriptors to exclude when determining the distance figure
+ Can be one or many of the following: count,mean,std,min,max,50%,25%,75%
+
+
+| Content type
+| application/json
+
+| Response Body
+| Example using parameter timdelta_days=3:
+....
+{
+    "distances": [
+        {
+            "dist": 10.36363618276997,
+            "group_name": "2016-03-19"
+        },
+        {
+            "dist": 5.400588482160052,
+            "group_name": "2016-03-20"
+        },
+        {
+            "dist": 16.879325560596605,
+            "group_name": "2016-03-21"
+        },
+        {
+            "dist": 4.995518163347003,
+            "group_name": "2016-03-22"
+        }
+    ],
+    "T_med": {
+        "count": 116.5,
+        "std": 55.28039928913964,
+        "min": -99.5,
+        "max": 98.5,
+        "50%": 5,
+        "25%": -43,
+        "75%": 39.125,
+        "mean": -0.4870580808080808
+    },
+    "meta": {
+        "to": "2016-03-22T09:09:35",
+        "include_descriptions": false,
+        "order_by_distance": false,
+        "from": "2016-03-19T09:09:35",
+        "diff_before_analysis": false,
+        "guid": "test.6000.temp",
+        "exclude_descriptors": [
+            ""
+        ],
+        "grouping": "DAILY"
+    }
+}
+....
+|===
+
 == Byteport asynchronous storage API v0.7
 Byteport also supports asynchronous communications, both for storing data and for sending messages to connected
 devices, the protocols we support are:
