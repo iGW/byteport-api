@@ -1024,7 +1024,7 @@ build_calendar::
 |===
 
 
-=== Experimental: Time series anomaly detection - Distance to Typical algorithm.
+=== Time series anomaly detection
 This service is *experimental* and is subject to change at any point without notice.
 
 Returns a list of elements, each carrying a date and a distance to a calculated
