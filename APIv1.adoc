@@ -1,5 +1,5 @@
-= Byteport API v1.3
-v1.2, 2016-02-15
+= Byteport API v1.4
+v1.2, 2016-04-11
 :library: Asciidoctor
 :idprefix:
 :numbered:
@@ -33,6 +33,9 @@ Changes to the API minor number will not break the API but is a hint to added fu
 and will *not change* the URL prefix, ie v1.0 and v1.1 clients both uses the /api/v1/ prefix.
 
 == Changelog
+=== v1.4 [2016/03]
+Added (experimental) method to analyze time series data to establish if an anomaly has occurred.
+
 === v1.3 [2016/02]
 Added method to view last 24h namespace activity. Added method to obtain time series statistics.
 
@@ -1062,7 +1065,7 @@ experimental mode.
 | Parameter(s)
 |
 from::
- An ISO8601 datetime, %Y-%m-%dT%H:%M:%S. Example 2015-04-01T13:14:15
+ An ISO8601 datetime, %Y-%m-%dT%H:%M:%S.%f. Example 2015-04-01T13:14:15.%f
 to::
  An ISO8601 datetime.
 timedelta_minutes::
