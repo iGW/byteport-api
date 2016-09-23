@@ -13,7 +13,7 @@ NOTE: All tests here need a Byteport instance to communicate with
 class TestHttpClients(unittest.TestCase):
 
     PRODUCTION = ('api.byteport.se', '(- LOOK IT UP -)', 'N/A', 'N/A')
-    ACCEPTANCE = ('acc.byteport.se', 'd74f48f8375a32ca632fa49a', 'N/A', 'N/A')
+    ACCEPTANCE = ('acc.www.byteport.se', 'd74f48f8375a32ca632fa49a', 'N/A', 'N/A')
     LOCALHOST = ('localhost:8000', 'TEST', 'admin', 'admin')
 
     TEST_ENVIRONMENT = LOCALHOST
@@ -157,6 +157,29 @@ class TestHttpClients(unittest.TestCase):
 
         # Will raise exception upon errors
         client.store(data)
+
+    def test_should_store_packets_using_POST_client_vs_legacy_api(self):
+        client = ByteportHttpClient(
+            byteport_api_hostname=self.byteport_api_hostname,
+            namespace_name=self.namespace,
+            api_key=self.key,
+            default_device_uid=self.device_uid
+        )
+
+        p0 = dict()
+        p0['uid']       = self.device_uid
+        p0['namespace'] = self.namespace
+        p0['timestamp'] = '%s' % time.time()
+        p0['data'] = 'f1=10;f2=20;'
+
+        p1 = dict()
+        p1['uid']       = self.device_uid
+        p1['namespace'] = self.namespace
+        p1['timestamp'] = '%s' % time.time()
+        p1['data'] = 'f1=10;f2=20;'
+
+        # Will raise exception upon errors
+        client.store_packets([p0, p1], 'INSERT_LEGACY_KEY')
 
     def test_should_store_text_data_base64_encoded_to_single_field_name_using_POST_client(self):
         client = ByteportHttpClient(
@@ -338,6 +361,18 @@ class TestHttpClients(unittest.TestCase):
 
         raise Exception("ByteportLoginFailedException was NOT thrown during invalid login!")
 
+    def test_should_login_and_make_set_field_operation(self):
+        client = ByteportHttpClient(
+            byteport_api_hostname=self.byteport_api_hostname
+        )
+
+        client.login(self.test_user, self.test_password)
+
+        # List Namespaces
+        result = client.set_fields('test', 'Control_example_device', {'Rubico app prop.Reboot': '1234'})
+
+        self.assertTrue(len(result) > 0)
+
     def test_should_login_and_access_protected_resource(self):
         client = ByteportHttpClient(
             byteport_api_hostname=self.byteport_api_hostname
@@ -483,17 +518,40 @@ class TestStompClient(unittest.TestCase):
     def test_should_connect_and_send_one_message_using_stomp_client(self):
 
         client = ByteportStompClient(
-            'test', 'publicTestUser', 'publicTestUser', broker_hosts=self.TEST_BROKERS)
+            'test', 'testuser', 'testuser', broker_hosts=self.TEST_BROKERS)
 
         client.store({'stomp_data': 'hello STOMP world!'}, self.test_device_uid)
 
 
+import threading
 class TestMQTTClient(unittest.TestCase):
 
-    TEST_BROKERS = ['acc.broker.byteport.se']
+    TEST_BROKER = 'broker.byteport.se'
 
-    test_device_uid = '6000'
+    test_device_uid = '6001'
 
-    def test_should_connect_using_mqtt_client(self):
+    def test_should_connect_to_namespace_vhost_using_mqtt_client(self):
 
-        client = ByteportMQTTClient('test', self.test_device_uid, 'publicTestUser', 'publicTestUser', broker_hosts=self.TEST_BROKERS)
+        client = ByteportMQTTClient(
+            'test', self.test_device_uid, 'eluw_test', 'eluw_test',
+            broker_host=self.TEST_BROKER, loop_forever=False)
+
+        thread1 = threading.Thread(target=client.block)
+        thread1.start()
+
+        while True:
+            client.store("Hello MQTT, this should normally be consumed by Bosses!!!")
+            time.sleep(2)
+
+    def test_should_connect_to_root_vhost_using_mqtt_client(self):
+
+        client = ByteportMQTTClient(
+            'test', self.test_device_uid, 'eluw_test', 'eluw_test',
+            broker_host=self.TEST_BROKER, loop_forever=False, explicit_vhost='/')
+
+        thread1 = threading.Thread(target=client.block)
+        thread1.start()
+
+        while True:
+            client.store('number=10')
+            time.sleep(2)

@@ -47,8 +47,10 @@ class ByteportHttpClient(AbstractByteportClient):
 
     LOAD_TIMESERIES_DATA        = '/api/v1/timeseries/%s/%s/%s/'
     DEFAULT_BYTEPORT_STORE_PATH = '/api/v1/timeseries/'
+    PACKETS_STORE_PATH          = '/api/legacy/packets/timeseries/'
 
-    SEND_MESSAGE = '/api/v1/message/%s/%s/'
+    SEND_MESSAGE    = '/api/v1/message/%s/%s/'
+    SET_FIELDS      = '/api/v1/device_control/set_fields/%s/%s/'
 
     #
     DEFAULT_BYTEPORT_API_STORE_URL = '%s://%s%s' % (DEFAULT_BYTEPORT_API_PROTOCOL,
@@ -273,7 +275,28 @@ class ByteportHttpClient(AbstractByteportClient):
 
         return json.loads(self.make_request(url).read())
 
-    def make_request(self, url, post_data=None):
+    def set_fields(self, namespace, uid, set_fields):
+        base_url = '%s://%s%s' % (self.DEFAULT_BYTEPORT_API_PROTOCOL, self.byteport_api_hostname, self.SET_FIELDS)
+
+        url = base_url % (namespace, uid)
+
+        post_data = set_fields
+
+        post_data['csrfmiddlewaretoken'] = self.__get_value_of_cookie('csrftoken')
+
+        # Encode data to UTF-8 before storing
+        utf8_encoded_data = self.convert_data_to_utf8(post_data)
+
+        return json.loads(self.make_request(url, utf8_encoded_data).read())
+
+    def make_request(self, url, post_data=None, body=None):
+        '''
+
+        :param url: URL to make the request to
+        :param post_data: A dictionary that will be url-encoded if set
+        :param body: If set, this will override any post_data and be directly set as the request body
+        :return:
+        '''
 
         try:
             logging.debug(url)
@@ -285,7 +308,10 @@ class ByteportHttpClient(AbstractByteportClient):
                 headers = {'User-Agent': 'Mozilla/5.0'}
 
                 # NOTE: If post_data != None, the request will be a POST request instead
-                if post_data is not None:
+                if body is not None:
+                    post_data = body
+                    headers['Content-Type'] = 'application/json'
+                elif post_data is not None:
                     post_data = urllib.urlencode(post_data)
 
                 req = urllib2.Request(url, headers=headers, data=post_data)
@@ -444,6 +470,15 @@ class ByteportHttpClient(AbstractByteportClient):
         utf8_encoded_data = self.convert_data_to_utf8(data)
 
         self.make_request(url, utf8_encoded_data)
+
+    def store_packets(self, packets, legacy_key):
+        url = '%s://%s%s' % (self.DEFAULT_BYTEPORT_API_PROTOCOL, self.byteport_api_hostname, self.PACKETS_STORE_PATH)
+
+        data = dict()
+        data['packets'] = json.dumps(packets)
+        data['legacy_key'] = legacy_key
+
+        self.make_request(url, self.convert_data_to_utf8(data))
 
 '''
     Simple client for sending data using HTTP GET request (ie. data goes as request parameters)
