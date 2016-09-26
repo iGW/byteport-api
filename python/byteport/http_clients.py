@@ -471,11 +471,16 @@ class ByteportHttpClient(AbstractByteportClient):
 
         self.make_request(url, utf8_encoded_data)
 
-    def store_packets(self, packets, legacy_key):
+    def store_packets(self, packets, legacy_key, json_encode=True):
         url = '%s://%s%s' % (self.DEFAULT_BYTEPORT_API_PROTOCOL, self.byteport_api_hostname, self.PACKETS_STORE_PATH)
 
+        if json_encode:
+            packets_as_json = json.dumps(packets)
+        else:
+            packets_as_json = packets
+
         data = dict()
-        data['packets'] = json.dumps(packets)
+        data['packets'] = packets_as_json
         data['legacy_key'] = legacy_key
 
         self.make_request(url, self.convert_data_to_utf8(data))
