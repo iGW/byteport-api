@@ -521,7 +521,7 @@ class TestStompClient(unittest.TestCase):
     TEST_BROKER = 'broker.byteport.se'
 
     test_user = 'stomp_test'
-    test_pass = '*** hidden ***'
+    test_pass = '*** look it up ***'
     test_namespace = 'test'
     test_device_uid = '6002'
 
@@ -573,7 +573,11 @@ class TestStompClient(unittest.TestCase):
                                 logging.warn("Rejecting message from future! (Local clock, skewed?, message age=%s, now=%s)" % (message_age, now))
                                 # Note, if you trust server time, you could have the system clock set using the message date to ensure future messages will be received.
                             else:
-                                logging.info(u"Processing message to %s.%s (age=%s s.), payload was: %s." % (m['namespace'], m['uid'], message_age, m['data']))
+                                if m['uid'] == self.test_device_uid and m['namespace'] == self.test_namespace:
+                                    logging.info(u"Got message for this device, Processing message to %s.%s (age=%s s.), payload was: %s." % (m['namespace'], m['uid'], message_age, m['data']))
+                                else:
+                                    logging.info(u'Got message for child device %s, routing it down-stream etc...' % m['uid'])
+
                     else:
                         logging.info(u"Received plain text message: %s" % frame.body)
 

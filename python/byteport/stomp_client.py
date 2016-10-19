@@ -26,7 +26,7 @@ class ByteportStompClient(AbstractByteportClient):
 
     client = None
 
-    def __init__(self, namespace, login, passcode, broker_host=DEFAULT_BROKER_HOST, device_uid=None, channel_type='topic', channel_key=''):
+    def __init__(self, namespace, login, passcode, broker_host=DEFAULT_BROKER_HOST, device_uid=None, channel_type='topic'):
         '''
         Create a ByteportStompClient. This is a thin wrapper to the underlying STOMP-client that connets to the Byteport Broker
 
@@ -34,10 +34,6 @@ class ByteportStompClient(AbstractByteportClient):
 
         The channel_type must be either 'topic' or 'queue'. Set top topic if unsure on what to use (use queue if you need to
         use multiple consumers for a single device, this is not how most applications are set up).
-
-        If on Byteport 1.5, you can supply a channel_key. The channel key is default set to the namespace API key (which is shared
-        among all devices), but can be overridden per device from the Byteport Device Manager, you could set it to the Device Key
-        or any other randomly set key (see the Byteport web for how to do this).
 
         :param namespace:
         :param login:           Broker username (Byteport web users are _not_ valid broker users). Ask support@byteport.se for access.
@@ -69,7 +65,7 @@ class ByteportStompClient(AbstractByteportClient):
                 subscribe_headers[StompSpec.ACK_HEADER] = StompSpec.ACK_CLIENT_INDIVIDUAL
                 subscribe_headers[StompSpec.ID_HEADER] = '0'
 
-                device_message_queue_name = '/%s/device_messages%s_%s.%s' % (channel_type, channel_key, namespace, device_uid)
+                device_message_queue_name = '/%s/device_messages_%s.%s' % (channel_type, namespace, device_uid)
 
                 self.subscription_token = self.client.subscribe(device_message_queue_name, subscribe_headers)
                 logging.info("Subscribing to channel %s" % device_message_queue_name)
