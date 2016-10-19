@@ -518,10 +518,10 @@ class PollingTests(unittest.TestCase):
 
 class TestStompClient(unittest.TestCase):
 
-    TEST_BROKER = 'broker.byteport.se'
+    TEST_BROKER = 'stomp.byteport.se'
 
     test_user = 'stomp_test'
-    test_pass = '*** look it up ***'
+    test_pass = '!!!stomp_test'
     test_namespace = 'test'
     test_device_uid = '6002'
 
