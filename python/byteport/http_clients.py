@@ -4,12 +4,18 @@ import urllib2
 import logging
 import base64
 import zlib
-import bz2
 import time
 import os
 import socks
 import json
 import cookielib
+
+try:
+    import bz2
+    bzip2_enabled = True
+except Exception:
+    print "Failed to import bz2 library (Did you compile Python from sources?). Bzip2 compression will not be a available."
+    bzip2_enabled = False
 
 from urllib2 import HTTPError
 from utils import DictDiffer
@@ -444,7 +450,7 @@ class ByteportHttpClient(AbstractByteportClient):
             data_block = fileobj
         elif compression == 'gzip':
             data_block = zlib.compress(fileobj)
-        elif compression == 'bzip2':
+        elif compression == 'bzip2' and bzip2_enabled:
             data_block = bz2.compress(fileobj)
         else:
             raise ByteportClientUnsupportedCompressionException("Unsupported compression method '%s'" % compression)
