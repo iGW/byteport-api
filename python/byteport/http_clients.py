@@ -308,22 +308,24 @@ class ByteportHttpClient(AbstractByteportClient):
             logging.debug(url)
             # Set a valid User agent tag since api.byteport.se is CloudFlared
             # TODO: add a proper user-agent and make sure CloudFlare can handle it
+            headers = {'User-Agent': 'curl/7.51.0'}
+
+            # NOTE: If post_data != None, the request will be a POST request instead
+            if body is not None:
+                post_data = body
+                headers['Content-Type'] = 'application/json'
+            elif post_data is not None:
+                post_data = urllib.urlencode(post_data)
+
+            req = urllib2.Request(url, headers=headers, data=post_data)
+
             if self.opener:
-                return self.opener.open(url)
+                opener = self.opener
             else:
-                headers = {'User-Agent': 'Mozilla/5.0'}
-
-                # NOTE: If post_data != None, the request will be a POST request instead
-                if body is not None:
-                    post_data = body
-                    headers['Content-Type'] = 'application/json'
-                elif post_data is not None:
-                    post_data = urllib.urlencode(post_data)
-
-                req = urllib2.Request(url, headers=headers, data=post_data)
-
                 opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(self.cookiejar))
-                return opener.open(req)
+
+            return opener.open(req)
+
 
         except HTTPError as http_error:
             logging.error(u'HTTPError accessing %s, Error was: %s' % (url, http_error))
