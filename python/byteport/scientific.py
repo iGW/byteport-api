@@ -36,11 +36,15 @@ python setup.py install
 from byteport.http_clients import ByteportHttpClient
 import datetime
 import pandas
-import pandas_profiling
 
 ISO8601 = '%Y-%m-%dT%H:%M:%S.%f'
 
 class ByteportPandas:
+    """
+    Provides base functionality for connecting and loading data into Pandas data formats
+
+    Extend at will!
+    """
 
     def __init__(self, username, password):
         self.client = ByteportHttpClient()
@@ -70,37 +74,72 @@ class ByteportPandas:
 
 class TimeseriesAnalyser(ByteportPandas):
 
-    def split_describe(self, data_frame, grouping='DAILY'):
+    def groupby(self, data_frame, grouping='DAILY'):
         """
-        Split the series into chunks of _hours_ and describe() them individually
 
-        :param series:
-        :param hours:
+        Split the series into sub-sets of _hours_ or _days_ and return one vector with parameters
+        describing each subset. The subset can then be clustered etc.
+
+        :param data_frame:
+        :param grouping:
+        :param subset_analysis:
         :return:
         """
 
-        DFList = []
-
         if grouping == 'DAILY':
-            grouping = [data_frame.index.date]
+            groups = [data_frame.index.date]
         elif grouping == 'HOURLY':
-            grouping = [data_frame.index.date, data_frame.index.hour]
+            groups = [data_frame.index.date, data_frame.index.hour]
+        elif grouping == 'WEEKLY':
+            groups = [lambda x: x.isocalendar()[0:1]]
         else:
             raise Exception("Unsupported grouping, '%s'" % grouping)
 
-        for group in data_frame.groupby(grouping):
-            DFList.append(group)
+        # Return a new DataFrame
+        groups = []
+        for group in data_frame.groupby(groups):
+            groups.append(group)
 
-        descriptions = []
-        for group_time, grouped_data_frame in DFList:
-            descriptions.append((group_time, grouped_data_frame.describe()))
+        return groups
 
-        return descriptions
+    def group_and_describe(self, data_frame, grouping='DAILY', subset_analysis='pandas_describe'):
+        """
 
-    def print_pandas_profiling_report(self, pandas_series, series_name):
-        pandas_data_frame = pandas_series.to_frame(series_name)
+        Split the series into sub-sets of _hours_ or _days_ and return one vector with parameters
+        describing each subset. The subset can then be clustered etc.
 
-        print "Pandas Profiling for : %s " % series_name
-        profile_report = pandas_profiling.describe(pandas_data_frame)
-        print profile_report
+        :param data_frame:
+        :param grouping:
+        :param subset_analysis:
+        :return:
+        """
+        grouped_data = self.groupby(data_frame, grouping)
+
+        description_dfs = list()
+
+        for group_time, grouped_data_frame in grouped_data:
+            
+            if subset_analysis == 'pandas_describe':
+                # Use the full describe() vector
+                subset_description = grouped_data_frame.describe()
+            elif subset_analysis == 'pandas_mean_std':
+                # Use only mean and std of the describe() vector
+                subset_description = grouped_data_frame.describe()
+            else:
+                raise Exception("Unsupported vectorization method")
+
+            if grouping == 'DAILY':
+                subset_description.columns = [u'%s' % group_time[0]]
+            elif grouping == 'HOURLY':
+                subset_description.columns = [u'%s %s' % (group_time[0], group_time[1])]
+            else:
+                raise Exception("Unsupported grouping, '%s'" % grouping)
+
+            # Extract values
+            description_dfs.append(subset_description)
+
+        concatenated = pandas.concat(description_dfs, axis=1)
+
+        return concatenated
+
 

@@ -5,6 +5,13 @@ from http_clients import *
 from stomp_client import *
 from mqtt_client import *
 
+import sys
+import logging
+
+logger = logging.getLogger()
+logger.level = logging.INFO
+stream_handler = logging.StreamHandler(sys.stdout)
+logger.addHandler(stream_handler)
 '''
 
 NOTE: All tests here need a Byteport instance to communicate with
@@ -13,8 +20,8 @@ NOTE: All tests here need a Byteport instance to communicate with
 class TestHttpClients(unittest.TestCase):
 
     PRODUCTION = ('api.byteport.se', '(- LOOK IT UP -)', 'N/A', 'N/A')
-    ACCEPTANCE = ('acc.byteport.se', 'd74f48f8375a32ca632fa49a', 'N/A', 'N/A')
-    LOCALHOST = ('localhost:8000', 'TEST', 'admin', 'admin')
+    ACCEPTANCE = ('acc.www.byteport.se', 'd74f48f8375a32ca632fa49a', 'N/A', 'N/A')
+    LOCALHOST = ('localhost:8000', 'TEST', 'admin@igw.se', 'admin')
 
     TEST_ENVIRONMENT = LOCALHOST
 
@@ -157,6 +164,29 @@ class TestHttpClients(unittest.TestCase):
 
         # Will raise exception upon errors
         client.store(data)
+
+    def test_should_store_packets_using_POST_client_vs_legacy_api(self):
+        client = ByteportHttpClient(
+            byteport_api_hostname=self.byteport_api_hostname,
+            namespace_name=self.namespace,
+            api_key=self.key,
+            default_device_uid=self.device_uid
+        )
+
+        p0 = dict()
+        p0['uid']       = self.device_uid
+        p0['namespace'] = self.namespace
+        p0['timestamp'] = '%s' % time.time()
+        p0['data'] = 'f1=10;f2=20;'
+
+        p1 = dict()
+        p1['uid']       = self.device_uid
+        p1['namespace'] = self.namespace
+        p1['timestamp'] = '%s' % time.time()
+        p1['data'] = 'f1=10;f2=20;'
+
+        # Will raise exception upon errors
+        client.store_packets([p0, p1], 'INSERT_LEGACY_KEY')
 
     def test_should_store_text_data_base64_encoded_to_single_field_name_using_POST_client(self):
         client = ByteportHttpClient(
@@ -338,6 +368,18 @@ class TestHttpClients(unittest.TestCase):
 
         raise Exception("ByteportLoginFailedException was NOT thrown during invalid login!")
 
+    def test_should_login_and_make_set_field_operation(self):
+        client = ByteportHttpClient(
+            byteport_api_hostname=self.byteport_api_hostname
+        )
+
+        client.login(self.test_user, self.test_password)
+
+        # List Namespaces
+        result = client.set_fields('test', 'Control_example_device', {'Rubico app prop.Reboot': '1234'})
+
+        self.assertTrue(len(result) > 0)
+
     def test_should_login_and_access_protected_resource(self):
         client = ByteportHttpClient(
             byteport_api_hostname=self.byteport_api_hostname
@@ -476,24 +518,127 @@ class PollingTests(unittest.TestCase):
 
 class TestStompClient(unittest.TestCase):
 
-    TEST_BROKERS = ['acc.broker.byteport.se']
+    TEST_BROKER = 'stomp.byteport.se'
 
-    test_device_uid = '6000'
+    test_user = 'stomp_test'
+    test_pass = '!!!stomp_test'
+    test_namespace = 'test'
+    test_device_uid = '6002'
 
-    def test_should_connect_and_send_one_message_using_stomp_client(self):
+    running = True
 
-        client = ByteportStompClient(
-            'test', 'publicTestUser', 'publicTestUser', broker_hosts=self.TEST_BROKERS)
+    def test_stomp_client__should_connect_send_and_subscribe_for_messages(self):
 
-        client.store({'stomp_data': 'hello STOMP world!'}, self.test_device_uid)
+        byteport_stomp_client = ByteportStompClient(
+            self.test_namespace, self.test_user, self.test_pass, broker_host=self.TEST_BROKER, device_uid=self.test_device_uid)
+
+        # NOTE: Trusted users can store data this way also.
+        #  argument to store should be a dict where the key is the field name to store
+        byteport_stomp_client.store({'info': 'hello STOMP world!', 'temperature': 20}, self.test_device_uid)
+
+        # Just to exemplify how to run a thread blocking for new frames and working
+        frame = None
+        loops = 0
+        while self.running:
+
+            logging.info("Waiting for STOMP frames for device %s.%s (and any child devices)..." % (self.test_namespace, self.test_device_uid))
+
+            if byteport_stomp_client.client.canRead(60):
+                try:
+                    # Block while waiting for frame (not can use canRead with a timeout also
+                    frame = byteport_stomp_client.client.receiveFrame()
+
+                    # NOTE: Messages can be sent to devices even if a Device is offline. This means
+                    # that potentially old messages can appear. This can be a good or bad thing.
+                    # The behaviour to filter out old messages is of course application specific.
+                    #
+                    # Remember that this client must have had its system clock correctly set before
+                    # such filtering could be performed (this can be detected if you never expect
+                    # old messages, messages from "future" could also be detected.
+                    #
+                    old_message_limit = 60
+                    future_message_trap = -30
+                    now = datetime.datetime.utcnow()
+
+                    # Work with frame (payload in body) here. Note that m['uid'] could point to a child-device that shoul have the messag forwarded!
+                    if frame.body.startswith('[{'):
+                        messages = json.loads(frame.body)
+                        for m in messages:
+                            # This is a good place to reject old messages
+                            dt = datetime.datetime.utcfromtimestamp(int(m['timestamp']))
+                            message_age = (now - dt).total_seconds()        # if dt is in future, this number will be negative
+                            if message_age > old_message_limit:
+                                logging.warn("Rejecting stale message!")
+                            elif message_age < future_message_trap:
+                                logging.warn("Rejecting message from future! (Local clock, skewed?, message age=%s, now=%s)" % (message_age, now))
+                                # Note, if you trust server time, you could have the system clock set using the message date to ensure future messages will be received.
+                            else:
+                                if m['uid'] == self.test_device_uid and m['namespace'] == self.test_namespace:
+                                    logging.info(u"Got message for this device, Processing message to %s.%s (age=%s s.), payload was: %s." % (m['namespace'], m['uid'], message_age, m['data']))
+                                else:
+                                    logging.info(u'Got message for child device %s, routing it down-stream etc...' % m['uid'])
+
+                    else:
+                        logging.info(u"Received plain text message: %s" % frame.body)
+
+                    # Ack Frame when done processing
+                    byteport_stomp_client.client.ack(frame)
+
+                except Exception as e:
+                    logging.error("Caught exception, reason was %s" % e)
+                    # Ack or Nack frame after errors
+                    # ACK will requeue the frame and other consumers may consume it
+                    # NACK will delete the message and will not be re-consumed.
+                    if frame:
+                        byteport_stomp_client.client.ack(frame)
+            else:
+                # Could not read, do something if you wish
+                pass
+
+            # Send STOMP heart beat in any case (NOTE: probably better to place in separate thread in real implementation)
+            byteport_stomp_client.store({'info': 'hello STOMP world!', 'loops': loops}, self.test_device_uid)
+            loops += 1
+
+    def test_shold_connect_and_disconnect_using_stomp_client(self):
+        byteport_stomp_client = ByteportStompClient(
+            self.test_namespace, self.test_user, self.test_pass, broker_host=self.TEST_BROKER, device_uid=self.test_device_uid)
+
+        # NOTE: Trusted users can store data this way also.
+        #  argument to store should be a dict where the key is the field name to store
+        byteport_stomp_client.store({'info': 'hello STOMP world!', 'temperature': 20}, self.test_device_uid)
+
+        byteport_stomp_client.disconnect()
 
 
+import threading
 class TestMQTTClient(unittest.TestCase):
 
-    TEST_BROKERS = ['acc.broker.byteport.se']
+    TEST_BROKER = 'broker.byteport.se'
 
-    test_device_uid = '6000'
+    test_device_uid = '6002'
 
-    def test_should_connect_using_mqtt_client(self):
+    def test_should_connect_to_namespace_vhost_using_mqtt_client(self):
 
-        client = ByteportMQTTClient('test', self.test_device_uid, 'publicTestUser', 'publicTestUser', broker_hosts=self.TEST_BROKERS)
+        client = ByteportMQTTClient(
+            'test', self.test_device_uid, 'eluw_test', 'eluw_test',
+            broker_host=self.TEST_BROKER, loop_forever=False)
+
+        thread1 = threading.Thread(target=client.block)
+        thread1.start()
+
+        while True:
+            client.store("Hello MQTT, this should normally be consumed by Bosses!!!")
+            time.sleep(2)
+
+    def test_should_connect_to_root_vhost_using_mqtt_client(self):
+
+        client = ByteportMQTTClient(
+            'test', self.test_device_uid, 'eluw_test', 'eluw_test',
+            broker_host=self.TEST_BROKER, loop_forever=False, explicit_vhost='/')
+
+        thread1 = threading.Thread(target=client.block)
+        thread1.start()
+
+        while True:
+            client.store('number=10')
+            time.sleep(2)

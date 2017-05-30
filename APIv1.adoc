@@ -33,6 +33,9 @@ Changes to the API minor number will not break the API but is a hint to added fu
 and will *not change* the URL prefix, ie v1.0 and v1.1 clients both uses the /api/v1/ prefix.
 
 == Changelog
+=== v1.5b [2016/09]
+[BETA] - Added initial websocket support for notifications of changes in device control data.
+
 === v1.4 [2016/03]
 Added (experimental) method to analyze time series data to establish if an anomaly has occurred.
 
@@ -747,7 +750,7 @@ Query for the field definitions for the given device type.
 | Parameter(s)
 |
 from::
- An ISO8601 datetime, %Y-%m-%dT%H:%M:%S. Example 2015-04-01T13:14:15
+ An ISO8601 datetime, %Y-%m-%dT%H:%M:%S.%f for example 2015-04-01T13:14:15.0    (note the trailing fractional zero is needed)
 to::
  An ISO8601 datetime.
 timedelta_minutes::
@@ -1160,7 +1163,9 @@ exclude_descriptors::
 ....
 |===
 
-== Byteport asynchronous storage API v0.7
+== Byteport asynchronous APIs
+
+=== Asynchronous protocols
 Byteport also supports asynchronous communications, both for storing data and for sending messages to connected
 devices, the protocols we support are:
 
@@ -1209,3 +1214,29 @@ All Byteport devices can listen on its designated queue, such as:
 ....
 
 The data sent to devices can *take on any form* as long as it is a valid ASCII string.
+
+
+=== WebSocket API [Beta] ===
+Experimental API that may not be active on the main servers as of this minute.
+
+The URL format for the WebSocket API is
+
+ws://[hostname]/ws/[service name]/
+
+
+==== Subscribe for device control updates ====
+By connecting and subscribing to the following URL
+
+ws://[hostname]/ws/device/control/[Namespace name]/[Device UID]?subscribe-broadcast
+
+You will receive instant updates to changes made to the Device Control data
+
+Response example:
+....
+{
+    'set_fields': {
+        'name': 'switch1',
+        'value': 'off'
+    }
+}
+....

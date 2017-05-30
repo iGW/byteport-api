@@ -4,12 +4,18 @@ import urllib2
 import logging
 import base64
 import zlib
-import bz2
 import time
 import os
 import socks
 import json
 import cookielib
+
+try:
+    import bz2
+    bzip2_enabled = True
+except Exception:
+    print "Failed to import bz2 library (Did you compile Python from sources?). Bzip2 compression will not be a available."
+    bzip2_enabled = False
 
 from urllib2 import HTTPError
 from utils import DictDiffer
@@ -47,8 +53,10 @@ class ByteportHttpClient(AbstractByteportClient):
 
     LOAD_TIMESERIES_DATA        = '/api/v1/timeseries/%s/%s/%s/'
     DEFAULT_BYTEPORT_STORE_PATH = '/api/v1/timeseries/'
+    PACKETS_STORE_PATH          = '/api/legacy/packets/timeseries/'
 
-    SEND_MESSAGE = '/api/v1/message/%s/%s/'
+    SEND_MESSAGE    = '/api/v1/message/%s/%s/'
+    SET_FIELDS      = '/api/v1/device_control/set_fields/%s/%s/'
 
     #
     DEFAULT_BYTEPORT_API_STORE_URL = '%s://%s%s' % (DEFAULT_BYTEPORT_API_PROTOCOL,
@@ -273,25 +281,51 @@ class ByteportHttpClient(AbstractByteportClient):
 
         return json.loads(self.make_request(url).read())
 
-    def make_request(self, url, post_data=None):
+    def set_fields(self, namespace, uid, set_fields):
+        base_url = '%s://%s%s' % (self.DEFAULT_BYTEPORT_API_PROTOCOL, self.byteport_api_hostname, self.SET_FIELDS)
+
+        url = base_url % (namespace, uid)
+
+        post_data = set_fields
+
+        post_data['csrfmiddlewaretoken'] = self.__get_value_of_cookie('csrftoken')
+
+        # Encode data to UTF-8 before storing
+        utf8_encoded_data = self.convert_data_to_utf8(post_data)
+
+        return json.loads(self.make_request(url, utf8_encoded_data).read())
+
+    def make_request(self, url, post_data=None, body=None):
+        '''
+
+        :param url: URL to make the request to
+        :param post_data: A dictionary that will be url-encoded if set
+        :param body: If set, this will override any post_data and be directly set as the request body
+        :return:
+        '''
 
         try:
             logging.debug(url)
             # Set a valid User agent tag since api.byteport.se is CloudFlared
             # TODO: add a proper user-agent and make sure CloudFlare can handle it
+            headers = {'User-Agent': 'curl/7.51.0'}
+
+            # NOTE: If post_data != None, the request will be a POST request instead
+            if body is not None:
+                post_data = body
+                headers['Content-Type'] = 'application/json'
+            elif post_data is not None:
+                post_data = urllib.urlencode(post_data)
+
+            req = urllib2.Request(url, headers=headers, data=post_data)
+
             if self.opener:
-                return self.opener.open(url)
+                opener = self.opener
             else:
-                headers = {'User-Agent': 'Mozilla/5.0'}
-
-                # NOTE: If post_data != None, the request will be a POST request instead
-                if post_data is not None:
-                    post_data = urllib.urlencode(post_data)
-
-                req = urllib2.Request(url, headers=headers, data=post_data)
-
                 opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(self.cookiejar))
-                return opener.open(req)
+
+            return opener.open(req)
+
 
         except HTTPError as http_error:
             logging.error(u'HTTPError accessing %s, Error was: %s' % (url, http_error))
@@ -418,7 +452,7 @@ class ByteportHttpClient(AbstractByteportClient):
             data_block = fileobj
         elif compression == 'gzip':
             data_block = zlib.compress(fileobj)
-        elif compression == 'bzip2':
+        elif compression == 'bzip2' and bzip2_enabled:
             data_block = bz2.compress(fileobj)
         else:
             raise ByteportClientUnsupportedCompressionException("Unsupported compression method '%s'" % compression)
@@ -444,6 +478,20 @@ class ByteportHttpClient(AbstractByteportClient):
         utf8_encoded_data = self.convert_data_to_utf8(data)
 
         self.make_request(url, utf8_encoded_data)
+
+    def store_packets(self, packets, legacy_key, json_encode=True):
+        url = '%s://%s%s' % (self.DEFAULT_BYTEPORT_API_PROTOCOL, self.byteport_api_hostname, self.PACKETS_STORE_PATH)
+
+        if json_encode:
+            packets_as_json = json.dumps(packets)
+        else:
+            packets_as_json = packets
+
+        data = dict()
+        data['packets'] = packets_as_json
+        data['legacy_key'] = legacy_key
+
+        self.make_request(url, self.convert_data_to_utf8(data))
 
 '''
     Simple client for sending data using HTTP GET request (ie. data goes as request parameters)

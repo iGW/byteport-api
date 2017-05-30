@@ -1,12 +1,14 @@
 import json
+import logging
 
 from client_base import *
+
 
 try:
     from stompest.config import StompConfig
     from stompest.protocol import StompSpec
     from stompest.sync import Stomp
-    from stompest.error import StompConnectionError
+    from stompest.error import StompConnectionError, StompProtocolError
 except ImportError:
     print "Could not import Stompest library. The STOMP client will not be supported."
     print ""
@@ -15,34 +17,77 @@ except ImportError:
 
 import time
 
+
 class ByteportStompClient(AbstractByteportClient):
-    DEFAULT_BROKER_HOSTS = ['broker.igw.se', 'broker1.igw.se', 'broker2.igw.se', 'broker3.igw.se']
-    QUEUE_NAME = '/queue/simple_string_dev_message'
+    DEFAULT_BROKER_HOST = 'stomp.byteport.se'
+    STORE_QUEUE_NAME = '/queue/simple_string_dev_message'
+
+    SUPPORTED_CHANNEL_TYPES = ['topic', 'queue']
 
     client = None
 
-    def __init__(self, namespace, login, passcode, broker_hosts=DEFAULT_BROKER_HOSTS):
+    def __init__(self, namespace, login, passcode, broker_host=DEFAULT_BROKER_HOST, device_uid=None, channel_type='topic'):
+        '''
+        Create a ByteportStompClient. This is a thin wrapper to the underlying STOMP-client that connets to the Byteport Broker
+
+        If a device_uid is given, a subscription will be made for Messages sent through Byteport.
+
+        The channel_type must be either 'topic' or 'queue'. Set top topic if unsure on what to use (use queue if you need to
+        use multiple consumers for a single device, this is not how most applications are set up).
+
+        :param namespace:
+        :param login:           Broker username (Byteport web users are _not_ valid broker users). Ask support@byteport.se for access.
+        :param passcode:        Broker passcode
+        :param broker_hosts:    [optional] A list of brokers to connect to
+        :param device_uid:      [optional] The device UID to subscribe for messages on
+        :param channel_type:    [optional] Defaults to queue.
+        :param channel_key:     [optional] Must match the configured key in the Byteport Device Manager
+
+        '''
 
         self.namespace = str(namespace)
+        self.device_uid = device_uid
 
-        for broker_host in broker_hosts:
-            broker_url = 'tcp://%s:61613' % broker_host
-            self.CONFIG = StompConfig(broker_url, version=StompSpec.VERSION_1_2)
-            self.client = Stomp(self.CONFIG)
+        if channel_type not in self.SUPPORTED_CHANNEL_TYPES:
+            raise Exception("Unsupported channel type: %s" % channel_type)
 
-            try:
-                # Convention: set vhost to the namespace. This will require a message-boss consuming on this vhost!!!
-                vhost = namespace
-                self.client.connect(headers={'login': login, 'passcode': passcode}, host=vhost)
-                print "Connected to %s using protocol version %s" % (broker_host, self.client.session.version)
-            except StompConnectionError:
-                pass
+        broker_url = 'tcp://%s:61613' % broker_host
+        self.CONFIG = StompConfig(broker_url, version=StompSpec.VERSION_1_2)
+        self.client = Stomp(self.CONFIG)
+
+        try:
+            self.client.connect(headers={'login': login, 'passcode': passcode}, host='/')
+            logging.info("Connected to Stomp broker at %s using protocol version %s" % (broker_host, self.client.session.version))
+
+            # Set up a subscription on the correct queue if a Specific device UID was given
+            if self.device_uid:
+                subscribe_headers = dict()
+                subscribe_headers[StompSpec.ACK_HEADER] = StompSpec.ACK_CLIENT_INDIVIDUAL
+                subscribe_headers[StompSpec.ID_HEADER] = '0'
+
+                device_message_queue_name = '/%s/device_messages_%s.%s' % (channel_type, namespace, device_uid)
+
+                self.subscription_token = self.client.subscribe(device_message_queue_name, subscribe_headers)
+                logging.info("Subscribing to channel %s" % device_message_queue_name)
+        except StompProtocolError as e:
+            logging.error("Client socket connected, but probably failed to login. (ProtocolError)")
+            raise
+
+        except StompConnectionError:
+            logging.error("Failed to connect to Stomp Broker at %s" % broker_host)
+            raise
 
     def disconnect(self):
+        if self.subscription_token:
+            try:
+                self.client.unsubscribe(self.subscription_token)
+            except Exception as e:
+                logging.error(u'Unsubscribe failed, reason %s' % e)
+
         self.client.disconnect()
 
     def __send_json_message(self, json):
-        self.client.send(self.QUEUE_NAME, json)
+        self.client.send(self.STORE_QUEUE_NAME, json)
 
     def __send_message(self, uid, data_string, timestamp=None):
 
@@ -50,6 +95,12 @@ class ByteportStompClient(AbstractByteportClient):
             timestamp = self.auto_timestamp(timestamp)
         else:
             timestamp = int(time.time())
+
+        if not uid:
+            uid = self.device_uid
+
+        if not uid:
+            raise Exception("Can not send data without valid Device UID!")
 
         message = dict()
         message['uid'] = str(uid)

@@ -1,4 +1,5 @@
 import datetime
+import time
 import re
 
 # Non standard imports, try to reduce if possible
@@ -112,3 +113,12 @@ class AbstractByteportClient:
             utf8_data[field_name] = value_as_utf8
 
         return utf8_data
+
+    def build_simple_string_device_message_packet(self, namespace, uid, data_string):
+        message = dict()
+        message['namespace']= namespace
+        message['uid']      = uid
+        message['data']     = data_string
+        message['timestamp']= '%s' % int(time.time())
+
+        return message

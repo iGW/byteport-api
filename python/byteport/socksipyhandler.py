@@ -30,7 +30,7 @@ class SocksiPyHandler(urllib2.HTTPHandler):
         urllib2.HTTPHandler.__init__(self)
 
     def http_open(self, req):
-        req.add_header('User-Agent', 'Mozilla/5.0')
+        req.add_header('User-Agent', 'curl/7.51.0')
         def build(host, port=None, strict=None, timeout=0):
             conn = SocksiPyConnection(*self.args, host=host, port=port, strict=strict, timeout=timeout, **self.kw)
             return conn
