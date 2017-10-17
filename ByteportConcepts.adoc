@@ -217,7 +217,7 @@ This makes it easy to generate a config-file. Just save all Properties.
 To load the config, just restore all Properties from the file.
 
 
-==== Property datatypes ====
+==== Property data-types ====
 
 A Property has a few predetermined types (int, float, enum, string) and a few
 hints (such as min, max for numbers) that helps a view such as byteport manager
@@ -225,10 +225,11 @@ to genenerate suitable controls automatically. See the libbyteport documentation
 for details.
 
 
-==== Property types ====
+==== Property meta-types ====
 
-The Property discussed so far has been the SettingProperty used for configuration.
-There are in total three flavors of Properties
+The metatype of a property describes how it is used (whereas the datatype describes what data it may hold)
+The meta-type of the Property example discussed so far has been the SettingProperty used for configuration.
+There are in total three flavors (meta-types) of Properties
 
 * SettingProperty
 ** _Description:_ Used for settings. The only Property that is saved to config files.
