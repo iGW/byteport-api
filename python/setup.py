@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 __author__ = 'hans'
 
-from distutils.core import setup
+from setuptools import setup
 
 setup(name='Byteport API',
       version='0.61',
