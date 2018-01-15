@@ -15,6 +15,10 @@ stream_handler = logging.StreamHandler(sys.stdout)
 logger.addHandler(stream_handler)
 
 
+# For tests to print function name
+#   this_function_name = sys._getframe().f_code.co_name
+import sys
+
 '''
 
 NOTE: All tests here need a Byteport instance to communicate with
@@ -22,11 +26,12 @@ NOTE: All tests here need a Byteport instance to communicate with
 '''
 class TestHttpClientBase(unittest.TestCase):
 
-    PRODUCTION = ('api.byteport.se', '2498gh23p99bh2pqinepi13b13', 't3stusr', 't3stusr!!!')
+    PRODUCTION = ('api.byteport.se', '-(LOOK IT UP)-', '-(LOOK IT UP)-', '-(LOOK IT UP)-')
+    STAGE = ('stage.byteport.se', '-(LOOK IT UP)-', '-(LOOK IT UP)-', '-(LOOK IT UP)-')
     ACCEPTANCE = ('acc.www.byteport.se', 'd74f48f8375a32ca632fa49a', 'N/A', 'N/A')
     LOCALHOST = ('localhost:8000', 'TEST', 'admin@igw.se', 'admin')
 
-    TEST_ENVIRONMENT = LOCALHOST
+    TEST_ENVIRONMENT = STAGE
 
     byteport_api_hostname = TEST_ENVIRONMENT[0]
     key = TEST_ENVIRONMENT[1]
@@ -507,6 +512,9 @@ class TestHttpLoginAndAccesss(TestHttpClientBase):
 
 class TestHttpRegisterDevice(TestHttpClientBase):
     def test_should_make_vaild_register_call_for_existing_device(self):
+        print "\n\n%s" % sys._getframe().f_code.co_name
+        print "---------------------------------------------------------------"
+
         client = ByteportHttpClient(
             byteport_api_hostname=self.byteport_api_hostname
         )
@@ -518,6 +526,9 @@ class TestHttpRegisterDevice(TestHttpClientBase):
         print json.dumps(response, indent=4)
 
     def test_should_make_vaild_register_call_for_existing_device_with_force_flag(self):
+        print "\n\n%s" % sys._getframe().f_code.co_name
+        print "---------------------------------------------------------------"
+
         client = ByteportHttpClient(
             byteport_api_hostname=self.byteport_api_hostname
         )
@@ -530,6 +541,9 @@ class TestHttpRegisterDevice(TestHttpClientBase):
 
     def test_should_register_one_new_device(self):
         import random
+        print "\n\n%s" % sys._getframe().f_code.co_name
+        print "---------------------------------------------------------------"
+
         client = ByteportHttpClient(
             byteport_api_hostname=self.byteport_api_hostname
         )
@@ -544,6 +558,9 @@ class TestHttpRegisterDevice(TestHttpClientBase):
 
     def test_should_batch_register_three_new_device(self):
         import random
+        print "\n\n%s" % sys._getframe().f_code.co_name
+        print "---------------------------------------------------------------"
+
         client = ByteportHttpClient(
             byteport_api_hostname=self.byteport_api_hostname
         )
@@ -559,6 +576,9 @@ class TestHttpRegisterDevice(TestHttpClientBase):
         print json.dumps(response, indent=4)
 
     def test_should_try_register_with_invalid_uid_but_fail_with_200_result_and_error_message(self):
+        print "\n\n%s" % sys._getframe().f_code.co_name
+        print "---------------------------------------------------------------"
+
         client = ByteportHttpClient(
             byteport_api_hostname=self.byteport_api_hostname
         )

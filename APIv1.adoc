@@ -34,6 +34,9 @@ and will *not change* the URL prefix, ie v1.0 and v1.1 clients both uses the /ap
 
 == Changelog
 === v1.5b [2016/09]
+[BETA] - Added API for device registration.
+
+=== v1.5b [2016/09]
 [BETA] - Added initial websocket support for notifications of changes in device control data.
 
 === v1.4 [2016/03]
@@ -505,6 +508,120 @@ Query for devices in a namespace.
 ]
 ....
 |===
+
+        "device_uid": "6000",
+        "device_type_id": "1",
+        "batch_register": "False"
+        "force": "True",
+        "reg_code": "",
+        "active": "False",
+
+=== Device Registration
+Register one or several Device UIDs in a Namespace. The device_uid
+parameter can take on one of the following forms:
+
+theDevice::
+A single device.
+
+deviceA, deviceB, DeviceC::
+Three devices from a comma separated list.
+
+device100-107::
+Eight devices devices in the span, each with prefix "device".
+
+10-19::
+Ten devices where the UID will be a single number.
+
+100-107Dev::
+Eight devices devices in the span, each with suffix "Dev".
+
+
+[cols="h,5a"]
+|===
+
+| URL
+| /api/v1/namespace/register_device/[namespace name]/
+
+| Method
+| POST
+
+| Cookie
+| csrftoken, sessionid
+
+| Parameter(s)
+| device_uid::
+  A single valid Device UID or a valid range descriptor when settings batch_register to True. See the above description.
+ device_type_id::
+  A number specifying the ID of the device type to set this device to.
+ batch_register::
+  Set this to True when using the range specifier when registering multiple devices using the dash.
+ force::
+  Registration will look like a successful new registration even if one or several devices already was existing.
+ reg_code::
+  OPTIONAL: A string representing the device publicly that can be used to bind to a Device, such as an EAN code. Used
+  if you do not want to expose the Device UID publicly. Used by custom built applications mostly.
+ active::
+  Set to True if this device is considered to be an active in-use device right away.
+
+| Content type
+| application/json
+
+| Response Body
+|
+Example 1) Successful registration of one device.
+....
+{
+    "registration_result": {
+        "requested_uids": [
+            "56374"
+        ],
+        "errors": [],
+        "namespace": "test",
+        "devices": [
+            {
+                "access_key": "uTNbKgghQ4WtNr5jnCtTsituoecWkGGG",
+                "reg_code": "62EA76DBFB10AD40",
+                "uid": "56374"
+            }
+        ],
+        "active": "False",
+        "device_type_id": "1",
+        "device_uid": "56374",
+        "batch_register": false
+    },
+    "datetime": "2018-01-15T13:52:05.237084",
+    "namespace": "api_doc",
+    "user": "api_doc@foobar.com",
+    "input_parameters": {
+        "reg_code": "",
+        "force": "False",
+        "active": "False",
+        "device_type_id": "1",
+        "device_uid": "56374",
+        "batch_register": "False"
+    }
+}
+....
+Example 2) Registration failed due to invalid Device UID. Note, it still returns a 200 OK HTTP code.
+....
+{
+    "datetime": "2018-01-15T13:52:05.519028",
+    "input_parameters": {
+        "reg_code": "",
+        "force": "False",
+        "active": "False",
+        "device_type_id": "1",
+        "device_uid": "#invaliduid_",
+        "batch_register": "False"
+    },
+    "namespace": "api_doc",
+    "user": "api_doc@foobar.com",
+    "error": "Error during registration process, reason was Invalid character(s) in UID #invaliduid_"
+}
+
+....
+|===
+
 
 === Send message to Device
 Messages can *instantly* be sent to devices connected to byteport given the devies communicates via the byteport

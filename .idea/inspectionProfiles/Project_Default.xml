@@ -5,7 +5,7 @@
     <inspection_tool class="PyPackageRequirementsInspection" enabled="true" level="WARNING" enabled_by_default="true">
       <option name="ignoredPackages">
         <value>
-          <list size="73">
+          <list size="77">
             <item index="0" class="java.lang.String" itemvalue="django-cms" />
             <item index="1" class="java.lang.String" itemvalue="django-extensions" />
             <item index="2" class="java.lang.String" itemvalue="django-less" />
@@ -79,6 +79,10 @@
             <item index="70" class="java.lang.String" itemvalue="twilio" />
             <item index="71" class="java.lang.String" itemvalue="django-mptt" />
             <item index="72" class="java.lang.String" itemvalue="django-classy-tags" />
+            <item index="73" class="java.lang.String" itemvalue="virtualenv-clone" />
+            <item index="74" class="java.lang.String" itemvalue="distribute" />
+            <item index="75" class="java.lang.String" itemvalue="virtualenvwrapper" />
+            <item index="76" class="java.lang.String" itemvalue="stevedore" />
           </list>
         </value>
       </option>
