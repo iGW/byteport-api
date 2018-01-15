@@ -509,13 +509,6 @@ Query for devices in a namespace.
 ....
 |===
 
-        "device_uid": "6000",
-        "device_type_id": "1",
-        "batch_register": "False"
-        "force": "True",
-        "reg_code": "",
-        "active": "False",
-
 === Device Registration
 Register one or several Device UIDs in a Namespace. The device_uid
 parameter can take on one of the following forms:
