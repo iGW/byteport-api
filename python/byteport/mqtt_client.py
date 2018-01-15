@@ -64,10 +64,10 @@ class ByteportMQTTClient(AbstractByteportClient):
 
         # Subscribing in on_connect() means that if we lose the connection and
         # reconnect then subscriptions will be renewed.
-        #self.mqtt_client.subscribe(self.self_topic_name, qos=self.QOS_LEVEL)
+        self.mqtt_client.subscribe(self.self_topic_name, qos=self.QOS_LEVEL)
 
         # For testing pub/subscribe via. RabbitMQ -> Exchange -> Queue
-        #self.client.subscribe(self.PUBLISH_TOPIC, qos=self.QOS_LEVEL)
+        self.mqtt_client.subscribe(self.PUBLISH_TOPIC, qos=self.QOS_LEVEL)
 
     # The callback for when a PUBLISH message is received from the server.
     def on_message(self, client, userdata, msg):

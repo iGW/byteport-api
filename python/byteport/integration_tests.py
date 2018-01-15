@@ -7,19 +7,22 @@ from mqtt_client import *
 
 import sys
 import logging
+import json
 
 logger = logging.getLogger()
 logger.level = logging.INFO
 stream_handler = logging.StreamHandler(sys.stdout)
 logger.addHandler(stream_handler)
+
+
 '''
 
 NOTE: All tests here need a Byteport instance to communicate with
 
 '''
-class TestHttpClients(unittest.TestCase):
+class TestHttpClientBase(unittest.TestCase):
 
-    PRODUCTION = ('api.byteport.se', '(- LOOK IT UP -)', 'N/A', 'N/A')
+    PRODUCTION = ('api.byteport.se', '2498gh23p99bh2pqinepi13b13', 't3stusr', 't3stusr!!!')
     ACCEPTANCE = ('acc.www.byteport.se', 'd74f48f8375a32ca632fa49a', 'N/A', 'N/A')
     LOCALHOST = ('localhost:8000', 'TEST', 'admin@igw.se', 'admin')
 
@@ -33,6 +36,8 @@ class TestHttpClients(unittest.TestCase):
     namespace = 'test'
     device_uid = 'byteport-api-tests'
 
+
+class TestStore(TestHttpClientBase):
     def test_should_store_string_to_single_field_name_using_GET_client(self):
         client = ByteportHttpClient(
             byteport_api_hostname=self.byteport_api_hostname,
@@ -165,6 +170,8 @@ class TestHttpClients(unittest.TestCase):
         # Will raise exception upon errors
         client.store(data)
 
+
+class TestHttpClientPacketStore(TestHttpClientBase):
     def test_should_store_packets_using_POST_client_vs_legacy_api(self):
         client = ByteportHttpClient(
             byteport_api_hostname=self.byteport_api_hostname,
@@ -176,13 +183,13 @@ class TestHttpClients(unittest.TestCase):
         p0 = dict()
         p0['uid']       = self.device_uid
         p0['namespace'] = self.namespace
-        p0['timestamp'] = '%s' % time.time()
+        p0['timestamp'] = '%s' % (time.time()+20)
         p0['data'] = 'f1=10;f2=20;'
 
         p1 = dict()
         p1['uid']       = self.device_uid
         p1['namespace'] = self.namespace
-        p1['timestamp'] = '%s' % time.time()
+        p1['timestamp'] = '%s' % (time.time()-20)
         p1['data'] = 'f1=10;f2=20;'
 
         # Will raise exception upon errors
@@ -329,6 +336,8 @@ class TestHttpClients(unittest.TestCase):
         )
         client.store_directory('./test_directory', 'dir_storing_test')
 
+
+class TestHttpClientLogin(TestHttpClientBase):
     def test_should_login_with_correct_credentials(self):
         client = ByteportHttpClient(
             byteport_api_hostname=self.byteport_api_hostname
@@ -368,6 +377,8 @@ class TestHttpClients(unittest.TestCase):
 
         raise Exception("ByteportLoginFailedException was NOT thrown during invalid login!")
 
+
+class TestHttpLoginAndAccesss(TestHttpClientBase):
     def test_should_login_and_make_set_field_operation(self):
         client = ByteportHttpClient(
             byteport_api_hostname=self.byteport_api_hostname
@@ -493,27 +504,70 @@ class TestHttpClients(unittest.TestCase):
 
         self.assertEqual(message[0]['data'], message_to_device)
 
-class PollingTests(unittest.TestCase):
 
-    #hostname = 'localhost:8000'
-    #hostname = 'acc.byteport.se'
-    hostname = 'api.byteport.se'
-    byteport_api_hostname = 'http://%s/services/store/' % hostname
-
-    namespace = 'test'
-    device_uid = 'byteport-api-tests'
-    key = 'd8a26587463268f88fea6aec'
-    #key = 'TEST'
-
-    def test_should_poll_directory_for_changes___needs_manual_change_to_trigger(self):
+class TestHttpRegisterDevice(TestHttpClientBase):
+    def test_should_make_vaild_register_call_for_existing_device(self):
         client = ByteportHttpClient(
-            byteport_api_hostname=self.byteport_api_hostname,
-            namespace_name=self.namespace,
-            api_key=self.key,
-            default_device_uid=self.device_uid,
-            initial_heartbeat=False
+            byteport_api_hostname=self.byteport_api_hostname
         )
-        client.poll_directory_and_store_upon_content_change('./test_directory/', 'dir_poller_test')
+
+        client.login(self.test_user, self.test_password)
+
+        response = client.batch_register_devices('test', '6000', False, '', False, '1')
+
+        print json.dumps(response, indent=4)
+
+    def test_should_make_vaild_register_call_for_existing_device_with_force_flag(self):
+        client = ByteportHttpClient(
+            byteport_api_hostname=self.byteport_api_hostname
+        )
+
+        client.login(self.test_user, self.test_password)
+
+        response = client.batch_register_devices('test', '6000', False, '', False, '1', True)
+
+        print json.dumps(response, indent=4)
+
+    def test_should_register_one_new_device(self):
+        import random
+        client = ByteportHttpClient(
+            byteport_api_hostname=self.byteport_api_hostname
+        )
+
+        client.login(self.test_user, self.test_password)
+
+        response = client.batch_register_devices('test', random.randint(0, 100000), False, '', False, '1')
+
+        print json.dumps(response, indent=4)
+
+        # self.assertEqual(message[0]['data'], message_to_device)
+
+    def test_should_batch_register_three_new_device(self):
+        import random
+        client = ByteportHttpClient(
+            byteport_api_hostname=self.byteport_api_hostname
+        )
+
+        client.login(self.test_user, self.test_password)
+
+        from_uid = random.randint(0, 100000)
+        to_uid = from_uid + 2
+        uid_range = '%s-%s' % (from_uid, to_uid)
+
+        response = client.batch_register_devices('test', uid_range, True, '', False, '1')
+
+        print json.dumps(response, indent=4)
+
+    def test_should_try_register_with_invalid_uid_but_fail_with_200_result_and_error_message(self):
+        client = ByteportHttpClient(
+            byteport_api_hostname=self.byteport_api_hostname
+        )
+
+        client.login(self.test_user, self.test_password)
+
+        response = client.batch_register_devices('test', '#invaliduid_', False, '', False, '1')
+
+        print json.dumps(response, indent=4)
 
 
 class TestStompClient(unittest.TestCase):

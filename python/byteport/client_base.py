@@ -24,6 +24,10 @@ class ByteportClientDeviceNotFoundException(ByteportClientException):
     pass
 
 
+class ByteportNotAllowedException(ByteportClientException):
+    pass
+
+
 class ByteportClientUnsupportedCompressionException(ByteportClientException):
     pass
 

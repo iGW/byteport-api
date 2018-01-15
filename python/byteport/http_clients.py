@@ -50,6 +50,7 @@ class ByteportHttpClient(AbstractByteportClient):
     GET_DEVICE_TYPE             = '/api/v1/namespace/%s/device_type/'
     GET_FIRMWARE                = '/api/v1/namespace/%s/device_type/%s/firmware/'
     GET_FIELD_DEFINITION        = '/api/v1/namespace/%s/device_type/%s/field_definition/'
+    REGISTER_DEVICES      = '/api/v1/namespace/register_device/%s/'
 
     LOAD_TIMESERIES_DATA        = '/api/v1/timeseries/%s/%s/%s/'
     DEFAULT_BYTEPORT_STORE_PATH = '/api/v1/timeseries/'
@@ -208,8 +209,8 @@ class ByteportHttpClient(AbstractByteportClient):
     def get_devices(self, namespace, key=None):
         base_url = '%s://%s%s' % (self.DEFAULT_BYTEPORT_API_PROTOCOL, self.byteport_api_hostname, self.GET_DEVICE)
         request_parameters = {}
-        if( key is not None ):
-            request_parameters['key'] = key
+        if key:
+            request_parameters['_key'] = key
 
         url = base_url % namespace + '?%s' % urllib.urlencode(request_parameters)
 
@@ -218,8 +219,8 @@ class ByteportHttpClient(AbstractByteportClient):
     def get_device_types(self, namespace, key=None):
         base_url = '%s://%s%s' % (self.DEFAULT_BYTEPORT_API_PROTOCOL, self.byteport_api_hostname, self.GET_DEVICE_TYPE)
         request_parameters = {}
-        if( key is not None ):
-            request_parameters['key'] = key
+        if key:
+            request_parameters['_key'] = key
 
         url = base_url % namespace + '?%s' % urllib.urlencode(request_parameters)
 
@@ -228,8 +229,8 @@ class ByteportHttpClient(AbstractByteportClient):
     def get_firmwares(self, namespace, device_type_id, key=None):
         base_url = '%s://%s%s' % (self.DEFAULT_BYTEPORT_API_PROTOCOL, self.byteport_api_hostname, self.GET_FIRMWARE)
         request_parameters = {}
-        if( key is not None ):
-            request_parameters['key'] = key
+        if key:
+            request_parameters['_key'] = key
 
         url = base_url % (namespace, device_type_id) + '?%s' % urllib.urlencode(request_parameters)
 
@@ -238,12 +239,32 @@ class ByteportHttpClient(AbstractByteportClient):
     def get_field_definitions(self, namespace, device_type_id, key=None):
         base_url = '%s://%s%s' % (self.DEFAULT_BYTEPORT_API_PROTOCOL, self.byteport_api_hostname, self.GET_FIELD_DEFINITION)
         request_parameters = {}
-        if key is not None:
-            request_parameters['key'] = key
+        if key:
+            request_parameters['_key'] = key
 
         url = base_url % (namespace, device_type_id) + '?%s' % urllib.urlencode(request_parameters)
 
         return json.loads(self.make_request(url).read())
+
+    def batch_register_devices(self, namespace, uids, batch_register, reg_code, active, device_type_id, force=False):
+        base_url = '%s://%s%s' % (self.DEFAULT_BYTEPORT_API_PROTOCOL, self.byteport_api_hostname, self.REGISTER_DEVICES)
+
+        url = base_url % namespace
+
+        post_data = dict()
+        post_data['device_uid'] = uids
+        post_data['batch_register'] = batch_register
+        post_data['reg_code'] = reg_code
+        post_data['active'] = active
+        post_data['device_type_id'] = device_type_id
+        post_data['force'] = force
+
+        post_data['csrfmiddlewaretoken'] = self.__get_value_of_cookie('csrftoken')
+
+        # Encode data to UTF-8 before storing
+        utf8_encoded_data = self.convert_data_to_utf8(post_data)
+
+        return json.loads(self.make_request(url, utf8_encoded_data).read())
 
     def load_timeseries_data_range(self, namespace, uid, field_name, from_time, to_time):
         """
@@ -326,7 +347,6 @@ class ByteportHttpClient(AbstractByteportClient):
 
             return opener.open(req)
 
-
         except HTTPError as http_error:
             logging.error(u'HTTPError accessing %s, Error was: %s' % (url, http_error))
             if http_error.code == 403:
@@ -338,6 +358,10 @@ class ByteportHttpClient(AbstractByteportClient):
                           u'namespace %s.' % self.namespace_name
                 logging.info(message)
                 raise ByteportClientDeviceNotFoundException(message)
+            if http_error.code == 406:
+                message = u'Not Allowed. Could be returned during device registration if you supply an invalid UID.'
+                logging.info(message)
+                raise ByteportNotAllowedException(message)
             if http_error.code == 500:
                 message = u'500, Server error!'
                 raise ByteportServerException(message)
