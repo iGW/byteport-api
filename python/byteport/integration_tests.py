@@ -31,7 +31,7 @@ class TestHttpClientBase(unittest.TestCase):
     ACCEPTANCE = ('acc.www.byteport.se', 'd74f48f8375a32ca632fa49a', 'N/A', 'N/A')
     LOCALHOST = ('localhost:8000', 'TEST', 'admin@igw.se', 'admin')
 
-    TEST_ENVIRONMENT = STAGE
+    TEST_ENVIRONMENT = LOCALHOST
 
     byteport_api_hostname = TEST_ENVIRONMENT[0]
     key = TEST_ENVIRONMENT[1]
@@ -521,9 +521,11 @@ class TestHttpRegisterDevice(TestHttpClientBase):
 
         client.login(self.test_user, self.test_password)
 
-        response = client.batch_register_devices('test', '6000', False, '', False, '1')
+        response = client.batch_register_devices('test', '6000', 1)
 
         print json.dumps(response, indent=4)
+
+        self.assertIsNone(response.get('registration_result', None))
 
     def test_should_make_vaild_register_call_for_existing_device_with_force_flag(self):
         print "\n\n%s" % sys._getframe().f_code.co_name
@@ -535,9 +537,11 @@ class TestHttpRegisterDevice(TestHttpClientBase):
 
         client.login(self.test_user, self.test_password)
 
-        response = client.batch_register_devices('test', '6000', False, '', False, '1', True)
+        response = client.batch_register_devices('test', '6000', 1, force=True)
 
         print json.dumps(response, indent=4)
+
+        self.assertIsNotNone(response.get('registration_result', None))
 
     def test_should_register_one_new_device(self):
         import random
@@ -550,11 +554,28 @@ class TestHttpRegisterDevice(TestHttpClientBase):
 
         client.login(self.test_user, self.test_password)
 
-        response = client.batch_register_devices('test', random.randint(0, 100000), False, '', False, '1')
+        response = client.batch_register_devices('test', random.randint(0, 100000), 1)
 
         print json.dumps(response, indent=4)
 
-        # self.assertEqual(message[0]['data'], message_to_device)
+        self.assertIsNotNone(response.get('registration_result', None))
+
+    def test_should_NOT_register_device_with_invalid_device_type_id(self):
+        import random
+        print "\n\n%s" % sys._getframe().f_code.co_name
+        print "---------------------------------------------------------------"
+
+        client = ByteportHttpClient(
+            byteport_api_hostname=self.byteport_api_hostname
+        )
+
+        client.login(self.test_user, self.test_password)
+
+        response = client.batch_register_devices('test', random.randint(0, 100000), 252525)
+
+        print json.dumps(response, indent=4)
+
+        self.assertEqual(response.get('registration_result', None), None)
 
     def test_should_batch_register_three_new_device(self):
         import random
@@ -571,9 +592,11 @@ class TestHttpRegisterDevice(TestHttpClientBase):
         to_uid = from_uid + 2
         uid_range = '%s-%s' % (from_uid, to_uid)
 
-        response = client.batch_register_devices('test', uid_range, True, '', False, '1')
+        response = client.batch_register_devices('test', uid_range, 1, batch_register=True)
 
         print json.dumps(response, indent=4)
+
+        self.assertEqual(len(response['registration_result']['devices']), 3)
 
     def test_should_try_register_with_invalid_uid_but_fail_with_200_result_and_error_message(self):
         print "\n\n%s" % sys._getframe().f_code.co_name
@@ -585,9 +608,11 @@ class TestHttpRegisterDevice(TestHttpClientBase):
 
         client.login(self.test_user, self.test_password)
 
-        response = client.batch_register_devices('test', '#invaliduid_', False, '', False, '1')
+        response = client.batch_register_devices('test', '#invaliduid_', 1)
 
         print json.dumps(response, indent=4)
+
+        self.assertIsNone(response.get('registration_result', None))
 
 
 class TestStompClient(unittest.TestCase):

@@ -246,7 +246,7 @@ class ByteportHttpClient(AbstractByteportClient):
 
         return json.loads(self.make_request(url).read())
 
-    def batch_register_devices(self, namespace, uids, batch_register, reg_code, active, device_type_id, force=False):
+    def batch_register_devices(self, namespace, uids, device_type_id, force=False, batch_register=False, reg_code='', active= False):
         base_url = '%s://%s%s' % (self.DEFAULT_BYTEPORT_API_PROTOCOL, self.byteport_api_hostname, self.REGISTER_DEVICES)
 
         url = base_url % namespace
