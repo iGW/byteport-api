@@ -33,7 +33,7 @@ Changes to the API minor number will not break the API but is a hint to added fu
 and will *not change* the URL prefix, ie v1.0 and v1.1 clients both uses the /api/v1/ prefix.
 
 == Changelog
-=== v1.5b [2016/09]
+=== v1.6b [2016/09]
 [BETA] - Added API for device registration.
 
 === v1.5b [2016/09]
