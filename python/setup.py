@@ -4,7 +4,7 @@ __author__ = 'hans'
 from setuptools import setup
 
 setup(name='Byteport API',
-      version='0.61',
+      version='1.6',
       description='Python Clients for Byteport (www.byteport.se)',
       author='Byteport developers',
       author_email='contact@byteport.se',
@@ -12,7 +12,7 @@ setup(name='Byteport API',
       packages=['byteport'],
       install_requires=[
             'pytz>=2015.7',
-            'stompest==2.1.6',
+            'stompest==2.3.0',
             'paho-mqtt==1.1'
       ]
 )

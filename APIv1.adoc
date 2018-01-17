@@ -234,7 +234,7 @@ Now supply the csrftoken as a cookie, as well as a request parameter in the POST
 username::
 password::
 csrfmiddlewaretoken::
- The CrossSiteRequestForgery token obtained as a Set-cooke in the GET request earlier.
+ The CrossSiteRequestForgery token obtained as a Set-cooke from an earlier GET request.
 
 | Response Set-Cookie
 | csrftoken, sessionid
@@ -546,12 +546,17 @@ Eight devices devices in the span, each with suffix "Dev".
   A single valid Device UID or a valid range descriptor when settings batch_register to True. See the above description.
  device_type_id::
   A number specifying the ID of the device type to set this device to.
+csrfmiddlewaretoken::
+ The CrossSiteRequestForgery token obtained as a Set-cooke from an earlier GET request.
  batch_register::
   OPTIONAL: Set this to True when using the range specifier when registering multiple devices using the dash. Default i false.
  force::
   OPTIONAL: Registration will look like a successful new registration even if one or several devices already was existing. Default is false.
  active::
   OPTIONAL: Set to True if this device is considered to be an active in-use device right away. Default is false.
+ reg_code::
+  OPTIONAL: If a custom registration code is wanted. Only usable when registering a single device (ie. batch_register=False).
+  The registration will fail if it is not globally unique.
 
 | Content type
 | application/json
@@ -586,6 +591,7 @@ Example 1) Successful registration of one device.
     "namespace": "api_doc",
     "user": "api_doc@foobar.com",
     "input_parameters": {
+        "reg_code": "",
         "force": "False",
         "active": "False",
         "device_type_id": "1",
@@ -600,6 +606,7 @@ structure is returned in this case.
 {
     "datetime": "2018-01-15T13:52:05.519028",
     "input_parameters": {
+        "reg_code": "",
         "force": "False",
         "active": "False",
         "device_type_id": "1",
@@ -645,6 +652,7 @@ Example 3) Below is the result after a successful batch registration.
     "namespace": "test",
     "user": "api_doc@foobar.com",
     "input_parameters": {
+        "reg_code": "",
         "force": "False",
         "active": "False",
         "device_type_id": "1",
@@ -697,6 +705,9 @@ message (POST only)::
 format (POST only)::
  Valid formats: *json* (other formats may be added)
  Wrap the message in the JSON structure like the example below. json is default.
+csrfmiddlewaretoken (POST only)::
+ The CrossSiteRequestForgery token obtained as a Set-cooke from an earlier GET request.
+
 ....
  [
    { "data": "[ASCII Payload, could be another JSON structure, XML or just a string]",
