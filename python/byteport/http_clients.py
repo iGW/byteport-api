@@ -23,12 +23,16 @@ from utils import DictDiffer
 from socksipyhandler import SocksiPyHandler
 from client_base import *
 
+USER_AGENT = 'curl/7.51.0'
+
+
 class ByteportHTTPRedirectHandler(urllib2.HTTPRedirectHandler):
     def http_error_302(self, req, fp, code, msg, headers):
         print "Cookie Manip Right Here"
         return urllib2.HTTPRedirectHandler.http_error_302(self, req, fp, code, msg, headers)
 
     http_error_301 = http_error_303 = http_error_307 = http_error_302
+
 
 class ByteportHttpClient(AbstractByteportClient):
 
@@ -50,7 +54,7 @@ class ByteportHttpClient(AbstractByteportClient):
     GET_DEVICE_TYPE             = '/api/v1/namespace/%s/device_type/'
     GET_FIRMWARE                = '/api/v1/namespace/%s/device_type/%s/firmware/'
     GET_FIELD_DEFINITION        = '/api/v1/namespace/%s/device_type/%s/field_definition/'
-    REGISTER_DEVICES      = '/api/v1/namespace/register_device/%s/'
+    REGISTER_DEVICES            = '/api/v1/namespace/register_device/%s/'
 
     LOAD_TIMESERIES_DATA        = '/api/v1/timeseries/%s/%s/%s/'
     DEFAULT_BYTEPORT_STORE_PATH = '/api/v1/timeseries/'
@@ -329,7 +333,7 @@ class ByteportHttpClient(AbstractByteportClient):
             logging.debug(url)
             # Set a valid User agent tag since api.byteport.se is CloudFlared
             # TODO: add a proper user-agent and make sure CloudFlare can handle it
-            headers = {'User-Agent': 'curl/7.51.0'}
+            headers = {'User-Agent': USER_AGENT}
 
             # NOTE: If post_data != None, the request will be a POST request instead
             if body is not None:
