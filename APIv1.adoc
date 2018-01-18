@@ -574,6 +574,13 @@ csrfmiddlewaretoken::
 A list of some important properties will be returned for each device that was registered. The **access_key** property
 is also the password in some instances when a Device is contacting Byteport.
 
+If there is a problem registering the devices. There will be no **registration_result** and instead there will be an
+**error** field describing the result.
+
+When batch registering. There could be potential problems with registering certain UIDs, in that case, there will be
+one or several entries of **errors** under the **registration_result** dictionary.
+
+
 | Response Body
 |
 
