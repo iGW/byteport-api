@@ -925,7 +925,7 @@ Query for the field definitions for the given device type.
 | Parameter(s)
 |
 from::
- An ISO8601 datetime, %Y-%m-%dT%H:%M:%S.%f for example 2015-04-01T13:14:15.0    (note the trailing fractional zero is needed)
+ An ISO8601 datetime, %Y-%m-%dT%H:%M:%S for example 2015-04-01T13:14:15
 to::
  An ISO8601 datetime.
 timedelta_minutes::
