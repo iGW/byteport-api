@@ -119,7 +119,7 @@ name in use for this purpose at the moment, but further functionality may be add
 |Field name | Description
 
 |_key
-|The API key to the namespace.
+|The API key to the namespace or device. A device should use its **access_key** when contacting an API.
 
 |_ts
 |A custom timestamp for all the data supplied in the call.
@@ -170,7 +170,7 @@ guarantee the data is immediately parsed and stored.
 | Parameter(s)
 |
 _key::
- The namespace API key
+ The namespace or device API key. A device should use its **access_key** when contacting an API.
 _ts::
  UNIX Timestamp in seconds since epoch.
 [any other]::
@@ -572,7 +572,7 @@ csrfmiddlewaretoken::
 | In the examples below. Note how 'input_parameters' structure returned shows what parameters used when performing the call.
 
 A list of some important properties will be returned for each device that was registered. The **access_key** property
-is also the password in some instances when a Device is contacting Byteport.
+is also the password in some instances when a Device is contacting Byteport through various APIs.
 
 If there is a problem registering the devices. There will be no **registration_result** and instead there will be an
 **error** field describing the result.
