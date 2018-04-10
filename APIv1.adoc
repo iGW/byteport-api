@@ -33,8 +33,12 @@ Changes to the API minor number will not break the API but is a hint to added fu
 and will *not change* the URL prefix, ie v1.0 and v1.1 clients both uses the /api/v1/ prefix.
 
 == Changelog
+=== v1.6.0 [2018/04]
+Updated API for device registration.
+Added API for device configuration - ie changing of a number of static fields.
+
 === v1.6b [2017/01]
-[BETA] - Added API for device registration.
+Added API for device registration.
 
 === v1.5b [2016/09]
 [BETA] - Added initial websocket support for notifications of changes in device control data.
@@ -550,7 +554,7 @@ Eight devices devices in the span, each with suffix "Dev".
 
 | Parameter(s)
 | device_uid::
-  A single valid Device UID or a valid range descriptor when settings batch_register to True. See the above description.
+  A single valid Device UID or a valid range descriptor (ie. sens1010-sens1020) when settings batch_register to True. See the above description.
  device_type_id::
   A number specifying the ID of the device type to set this device to.
 csrfmiddlewaretoken::
@@ -564,6 +568,10 @@ csrfmiddlewaretoken::
  reg_code::
   OPTIONAL: If a custom registration code is wanted. Only usable when registering a single device (ie. batch_register=False).
   The registration will fail if it is not globally unique.
+ serial::
+  OPTIONAL: Provide this if the device needs to carry a serial number that is different from the UID.
+  NOTE 1) Must be unique within the namespace.
+  NOTE 2) This can not be provided if batch registration is employed using the UID range feature.
 
 | Content type
 | application/json
@@ -676,6 +684,80 @@ Example 3) Below is the result after a successful batch registration.
 }
 ....
 |===
+
+
+=== Device Registration
+Register one or several Device UIDs in a Namespace. The device_uid
+parameter can take on one of the following forms:
+
+theDevice::
+A single device.
+
+deviceA, deviceB, DeviceC::
+Three devices from a comma separated list.
+
+device100-107::
+Eight devices devices in the span, each with prefix "device".
+
+10-19::
+Ten devices where the UID will be a single number.
+
+100-107Dev::
+Eight devices devices in the span, each with suffix "Dev".
+
+
+[cols="h,5a"]
+|===
+
+| URL
+| /api/v1/namespace/configure_device/[namespace name]/[device UID]/
+
+| Method
+| POST
+
+| Cookie
+| csrftoken, sessionid
+
+| Parameter(s), all are OPTIONAL:
+| active::
+   Boolean. Valid values could be true/false, 0 or 1.
+
+  lat::
+   Float. A WGS84 latitude coordinate.
+
+  lon::
+   Float. A WGS84 longitude coordinate.
+
+  location_hint::
+   A text hinting on the local position of the device.
+
+  alias::
+   An alias for the device that may be more human readable than the device UID or serial number.
+
+  serial::
+   Many devices carry a serial number, if not used as UID, set it here instead. Must be namespace unique.
+
+  description:
+   Any optional text describing the device.
+
+  timeout_limit:
+   A number in seconds specifying when the device should be regarded as offline. This timeout triggers the offline alarm, if set.
+
+  offline_alarm:
+   Boolean. Valid values could be true/false, 0 or 1.
+
+  alarm_interval:
+   A number for the offline alarm interval in seconds.
+
+  alarm_repeat_times:
+   A number specifying how many times to repeat the alarm
+
+
+| Content type
+| application/json
+
+| Notes
+| Will return 200 OK and a JSON response of the Device if the property was successfully updated or any 400-error if it failed.
 
 
 === Send message to Device
