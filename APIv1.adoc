@@ -578,6 +578,7 @@ csrfmiddlewaretoken::
 
 | Notes
 | In the examples below. Note how 'input_parameters' structure returned shows what parameters used when performing the call.
+|===
 
 A list of some important properties will be returned for each device that was registered. The **access_key** property
 is also the password in some instances when a Device is contacting Byteport through various APIs.
@@ -588,9 +589,6 @@ If there is a problem registering the devices. There will be no **registration_r
 When batch registering. There could be potential problems with registering certain UIDs, in that case, there will be
 one or several entries of **errors** under the **registration_result** dictionary.
 
-
-| Response Body
-|
 
 
 Example 1) Successful registration of one device.
@@ -622,6 +620,7 @@ Example 1) Successful registration of one device.
     }
 }
 ....
+
 Example 2) Registration failed due to invalid Device UID. Note, it still returns a 200 OK HTTP code. No 'registration_result'
 structure is returned in this case.
 ....
@@ -683,7 +682,6 @@ Example 3) Below is the result after a successful batch registration.
     }
 }
 ....
-|===
 
 
 === Device Registration
@@ -758,6 +756,7 @@ Eight devices devices in the span, each with suffix "Dev".
 
 | Notes
 | Will return 200 OK and a JSON response of the Device if the property was successfully updated or any 400-error if it failed.
+|===
 
 
 === Send message to Device
