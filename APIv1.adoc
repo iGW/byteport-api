@@ -685,7 +685,8 @@ Example 3) Below is the result after a successful batch registration.
 
 
 === Device Configuration
-Configure static properties of a device.
+Configure static properties of a device. Set the value by including it as a POST-data parameter. The updated device
+will be returned as JSON.
 
 [cols="h,5a"]
 |===
