@@ -718,19 +718,19 @@ Configure static properties of a device.
   serial::
    Many devices carry a serial number, if not used as UID, set it here instead. Must be namespace unique.
 
-  description:
+  description::
    Any optional text describing the device.
 
-  timeout_limit:
+  timeout_limit::
    A number in seconds specifying when the device should be regarded as offline. This timeout triggers the offline alarm, if set.
 
-  offline_alarm:
+  offline_alarm::
    Boolean. Valid values could be true/false, 0 or 1.
 
-  alarm_interval:
+  alarm_interval::
    A number for the offline alarm interval in seconds.
 
-  alarm_repeat_times:
+  alarm_repeat_times::
    A number specifying how many times to repeat the alarm
 
 
