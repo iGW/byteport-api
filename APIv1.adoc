@@ -684,25 +684,8 @@ Example 3) Below is the result after a successful batch registration.
 ....
 
 
-=== Device Registration
-Register one or several Device UIDs in a Namespace. The device_uid
-parameter can take on one of the following forms:
-
-theDevice::
-A single device.
-
-deviceA, deviceB, DeviceC::
-Three devices from a comma separated list.
-
-device100-107::
-Eight devices devices in the span, each with prefix "device".
-
-10-19::
-Ten devices where the UID will be a single number.
-
-100-107Dev::
-Eight devices devices in the span, each with suffix "Dev".
-
+=== Device Configuration
+Configure static properties of a device.
 
 [cols="h,5a"]
 |===
