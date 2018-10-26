@@ -566,7 +566,7 @@ csrfmiddlewaretoken::
  active::
   OPTIONAL: Set to True if this device is considered to be an active in-use device right away. Default is false.
  reg_code_length::
-  OPTIONAL: Determine length of registration code. It will return a globally unique string consisting of characters A-Z and 0-9.
+  OPTIONAL: Set length of registration code. It will return a globally unique string consisting of characters A-Z and 0-9.
  serial::
   OPTIONAL: Provide this if the device needs to carry a serial number that is different from the UID.
   NOTE 1) Must be unique within the namespace.
