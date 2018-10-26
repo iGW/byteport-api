@@ -86,7 +86,7 @@ class ByteportHttpClient(AbstractByteportClient):
         self.api_key = api_key
 
         if None in [namespace_name, api_key]:
-            logging.info("Store functions using API-key methods are disabled as no Namespace or API-key was supplied.")
+            logging.warn("Store functions using API-key methods are disabled as no Namespace or API-key was supplied.")
             self.store_enabled = False
         else:
             self.store_enabled = True
@@ -250,7 +250,7 @@ class ByteportHttpClient(AbstractByteportClient):
 
         return json.loads(self.make_request(url).read())
 
-    def batch_register_devices(self, namespace, uids, device_type_id, force=False, batch_register=False, reg_code='', active= False):
+    def batch_register_devices(self, namespace, uids, device_type_id, force=False, batch_register=False, reg_code_length=None, active= False, serial=None):
         base_url = '%s://%s%s' % (self.DEFAULT_BYTEPORT_API_PROTOCOL, self.byteport_api_hostname, self.REGISTER_DEVICES)
 
         url = base_url % namespace
@@ -258,10 +258,15 @@ class ByteportHttpClient(AbstractByteportClient):
         post_data = dict()
         post_data['device_uid'] = uids
         post_data['batch_register'] = batch_register
-        post_data['reg_code'] = reg_code
         post_data['active'] = active
         post_data['device_type_id'] = device_type_id
         post_data['force'] = force
+
+        if reg_code_length:
+            post_data['reg_code_length'] = reg_code_length
+
+        if serial:
+            post_data['serial'] = serial
 
         post_data['csrfmiddlewaretoken'] = self.__get_value_of_cookie('csrftoken')
 

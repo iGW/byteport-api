@@ -565,9 +565,8 @@ csrfmiddlewaretoken::
   OPTIONAL: Registration will look like a successful new registration even if one or several devices already was existing. Default is false.
  active::
   OPTIONAL: Set to True if this device is considered to be an active in-use device right away. Default is false.
- reg_code::
-  OPTIONAL: If a custom registration code is wanted. Only usable when registering a single device (ie. batch_register=False).
-  The registration will fail if it is not globally unique.
+ reg_code_length::
+  OPTIONAL: Determine length of registration code. It will return a globally unique string consisting of characters A-Z and 0-9.
  serial::
   OPTIONAL: Provide this if the device needs to carry a serial number that is different from the UID.
   NOTE 1) Must be unique within the namespace.
