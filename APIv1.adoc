@@ -1,5 +1,5 @@
-= Byteport API v1.4
-v1.2, 2016-04-11
+= Byteport API v1.6
+v1.6, 2021-02-28
 :library: Asciidoctor
 :idprefix:
 :numbered:
@@ -33,6 +33,8 @@ Changes to the API minor number will not break the API but is a hint to added fu
 and will *not change* the URL prefix, ie v1.0 and v1.1 clients both uses the /api/v1/ prefix.
 
 == Changelog
+=== v1.6.1 [2021/02]
+No API changes (yet), but released on git under correct version now.
 === v1.6.0 [2018/04]
 Updated API for device registration.
 Added API for device configuration - ie changing of a number of static fields.
