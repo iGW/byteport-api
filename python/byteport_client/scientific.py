@@ -33,7 +33,7 @@ cd pandas-profiling
 python setup.py install
 
 """
-from byteport.http_clients import ByteportHttpClient
+from byteport_client.http_clients import ByteportHttpClient
 import datetime
 import pandas
 
@@ -49,7 +49,7 @@ class ByteportPandas:
     def __init__(self, username, password):
         self.client = ByteportHttpClient()
         self.client.login(username, password)
-        print "Successfully logged in to Byteport!"
+        print("Successfully logged in to Byteport!")
 
     def load_to_series(self, namespace, device_uid, field_name, from_time, to_time):
         timeseries_data = self.client.load_timeseries_data_range(namespace, device_uid, field_name, from_time, to_time)
@@ -67,7 +67,7 @@ class ByteportPandas:
                 timestamps.append(dt)
                 values.append(fv)
             except Exception:
-                print "Failed to parse data (%s), ignoring" % row
+                print("Failed to parse data (%s), ignoring" % row)
 
         return pandas.Series(values, timestamps)
 

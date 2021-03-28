@@ -1,5 +1,5 @@
 
-from byteport.http_clients import ByteportHttpClient
+from byteport_client.http_clients import ByteportHttpClient
 
 #
 # NOTE: Needs a proxy set up on port 5000, first to this from shell:

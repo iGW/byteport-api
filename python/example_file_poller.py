@@ -1,6 +1,6 @@
 import logging
 import time
-from byteport.factories import byteport_client_from_optparse
+from byteport_client.factories import byteport_client_from_optparse
 
 #
 # Suggested improvement:

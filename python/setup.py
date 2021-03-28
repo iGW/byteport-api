@@ -4,12 +4,12 @@ __author__ = 'hans'
 from setuptools import setup
 
 setup(name='Byteport API',
-      version='1.6',
+      version='2.0',
       description='Python Clients for Byteport (www.byteport.se)',
       author='Byteport developers',
       author_email='contact@byteport.se',
       url='https://github.com/iGW/byteport-api',
-      packages=['byteport'],
+      packages=['byteport_client'],
       install_requires=[
             'pytz==2018.9',
             'stompest==2.3.0',

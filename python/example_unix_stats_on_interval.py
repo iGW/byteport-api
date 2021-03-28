@@ -5,7 +5,7 @@ import socket
 import logging
 import subprocess
 import re
-from byteport.factories import byteport_client_from_simple_argv
+from byteport_client.factories import byteport_client_from_simple_argv
 
 
 def collect_load_data(byteport_client, interval_sec=60):
