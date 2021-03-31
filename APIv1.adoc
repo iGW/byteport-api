@@ -273,7 +273,7 @@ will invalidate your current sessionid, and you will need to obtain a new one by
 | /api/v1/logout/
 
 | Method
-| Any
+| GET
 
 | Response code
 | 200
