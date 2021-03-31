@@ -35,6 +35,7 @@ and will *not change* the URL prefix, ie v1.0 and v1.1 clients both uses the /ap
 == Changelog
 === v1.6.1 [2021/02]
 No API changes (yet), but released on git under correct version now.
+
 === v1.6.0 [2018/04]
 Updated API for device registration.
 Added API for device configuration - ie changing of a number of static fields.
